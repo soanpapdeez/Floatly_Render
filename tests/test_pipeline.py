@@ -8,6 +8,8 @@ CLIENTS = load_clients()
 
 @pytest.mark.parametrize("email", load_inbox(), ids=lambda e: e["id"])
 def test_inbox_message(email):
+    if email.get("needs_real_llm"):
+        pytest.skip("needs a real LLM; the mock can't parse this")
     res = process_email(email, CLIENTS, mock_llm)
     exp = email["expected"]
     assert res.parsed.client_id == exp["client_id"]
