@@ -1,11 +1,14 @@
 """
 LLM adapter. get_llm() returns call_llm(system, user) -> str.
 Providers: mock (offline, regex - for plumbing/tests only), anthropic, openai.
+"openai" means ANY OpenAI-compatible API (OpenAI, Groq, Gemini, OpenRouter, Ollama):
+set OPENAI_BASE_URL + OPENAI_API_KEY + LLM_MODEL in .env.
 Set LLM_PROVIDER in .env. The mock is NOT a substitute for evaluating a real model.
 """
 import json
 import os
 import re
+import time
 
 DEFAULT_MODELS = {"anthropic": "claude-sonnet-5-5", "openai": "gpt-4o-mini"}
 
@@ -54,14 +57,41 @@ def _anthropic(model: str):
 
 
 def _openai(model: str):
+    """Works with OpenAI, Groq, Gemini (OpenAI-compat), OpenRouter, Ollama."""
     from openai import OpenAI
-    client = OpenAI()  # reads OPENAI_API_KEY
+    client = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        base_url=os.getenv("OPENAI_BASE_URL") or None,  # None = real OpenAI
+    )
+    debug = os.getenv("EXTRACTOR_DEBUG") == "1"
 
     def call(system: str, user: str) -> str:
-        r = client.chat.completions.create(
-            model=model, temperature=0,
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": user}])
-        return r.choices[0].message.content
+        messages = [{"role": "system", "content": system},
+                    {"role": "user", "content": user}]
+        base = dict(model=model, temperature=0, messages=messages)
+
+        last_err = None
+        for attempt in range(3):
+            try:
+                try:
+                    r = client.chat.completions.create(
+                        response_format={"type": "json_object"}, **base)
+                except Exception as e:
+                    # some providers/models reject JSON mode -> retry plain
+                    if debug:
+                        print(f"[llm] JSON mode failed ({e}); retrying without it")
+                    r = client.chat.completions.create(**base)
+                return r.choices[0].message.content
+            except Exception as e:
+                last_err = e
+                msg = str(e).lower()
+                if "429" in msg or "rate" in msg:
+                    if debug:
+                        print(f"[llm] rate limited, waiting (attempt {attempt + 1}/3)")
+                    time.sleep(5 * (attempt + 1))
+                    continue
+                raise
+        raise last_err
     return call
 
 
