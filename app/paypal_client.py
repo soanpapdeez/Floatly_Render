@@ -163,3 +163,13 @@ def send_payout(email: str, amount, currency: str = "USD", request_id: str = Non
                              headers=_headers({"PayPal-Request-Id": request_id}),
                              json=body, timeout=TIMEOUT))
     return r.json()["batch_header"]["payout_batch_id"]
+def get_payout_status(batch_id: str) -> str:
+    """Returns the payout status in lowercase ('success', 'pending', 'unclaimed', ...).
+    Uses the single item's status when present, otherwise the batch status."""
+    r = _check(requests.get(f"{base_url()}/v1/payments/payouts/{batch_id}",
+                            headers=_headers(), timeout=TIMEOUT))
+    data = r.json()
+    items = data.get("items") or []
+    raw = (items[0].get("transaction_status") if items
+           else data.get("batch_header", {}).get("batch_status", "UNKNOWN"))
+    return str(raw).lower()
