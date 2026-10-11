@@ -1,0 +1,8 @@
+[
+  {"invoice_id": "OPEN-001", "client_id": "acme",       "amount": 1500, "due_date": "2026-10-14"},
+  {"invoice_id": "OPEN-002", "client_id": "brightco",   "amount": 950,  "due_date": "2026-10-15"},
+  {"invoice_id": "OPEN-003", "client_id": "zenlabs",    "amount": 2000, "due_date": "2026-10-14"},
+  {"invoice_id": "OPEN-004", "client_id": "northwind",  "amount": 3500, "due_date": "2026-10-20"},
+  {"invoice_id": "OPEN-005", "client_id": "skyline",    "amount": 600,  "due_date": "2026-10-13"},
+  {"invoice_id": "OPEN-006", "client_id": "pixelforge", "amount": 450,  "due_date": "2026-10-18"}
+]

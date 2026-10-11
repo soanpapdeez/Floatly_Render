@@ -1,0 +1,4 @@
+[
+  {"contractor_id": "ravi-dev",     "name": "Ravi (developer)", "email": "sb-contractor1@personal.example.com", "amount_due": 1200},
+  {"contractor_id": "meera-design", "name": "Meera (designer)", "email": "sb-contractor2@personal.example.com", "amount_due": 1800}
+]
