@@ -26,8 +26,13 @@ main>div>section:first-child h2{font-size:36px;line-height:1.1;margin-bottom:20p
 .hint{color:var(--mute);font-size:13px;margin-top:10px}
 .gap{margin:6px 0 22px}.gap .big{font-size:56px;line-height:1.05;font-weight:700;letter-spacing:-.03em}.gap .big small{font-size:17px;color:var(--mute);font-weight:500;letter-spacing:0}
 .bar{position:relative;height:26px;background:#E4E9F1;border-radius:13px;overflow:hidden;margin:16px 0 12px}
-.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:13px;transition:width .6s ease}.b1{background:repeating-linear-gradient(45deg,#CFE6DD 0 6px,#E6F2ED 6px 12px)}.b2{background:var(--blue)}.b3{background:#2FBF84}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:13px;transition:width .6s ease}.b1{background:repeating-linear-gradient(45deg,#CFE6DD 0 6px,#E6F2ED 6px 12px)}.b2{background:#86C6AD}.b3{background:var(--blue)}
 .legend{display:flex;gap:22px;flex-wrap:wrap;font-size:13px;color:var(--mute)}.legend b{color:var(--ink);font-size:15px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--blue)}
+.legend span:nth-child(2)::before{background:#86C6AD}
+.legend span:nth-child(3)::before{background:repeating-linear-gradient(45deg,#CFE6DD 0 3px,#E6F2ED 3px 6px);border:1px solid #BFDCCF}
+.legend span:nth-child(4)::before{width:2px;border-radius:0;background:var(--ink)}
+.bar u{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}#plan .row{margin-top:24px}
 table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:14px 10px;border-bottom:1px solid var(--line);vertical-align:middle}th{font-size:13px;color:var(--mute);font-weight:500;padding-top:6px}
 tbody tr:hover td{background:#F7FAF9}td.r,th.r,.num{text-align:right;font-variant-numeric:tabular-nums}.num{text-align:left}
 .why{color:var(--mute);font-size:14px;max-width:46ch;line-height:1.5}
@@ -89,14 +94,14 @@ const av=n=>`<span class="av">${E(String(n||'?')[0])}</span><span class="cl">${E
 const pill=s=>`<span class="pill ${E(s)}">${E(String(s).replace('_',' '))}</span>`;
 async function api(p,b){const r=await fetch(p,b?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}:{});const j=await r.json();if(!r.ok)throw new Error(j.error||r.status);return j}
 function fail(e){Q('err').textContent=e.message}
-let P=null,gid=null,timer=null;
+let P=null,gid=null,timer=null,MODE='';
 const STEPS=['Plan','Invoices sent','Clients pay','Contractors paid'];
 const steps=n=>Q('steps').innerHTML=STEPS.map((t,i)=>`<li class="${i<n?'done':i==n?'now':''}">${t}</li>`).join('');
 Q('try').innerHTML='Try <button class="btn ghost">I need $6k by Friday</button><button class="btn ghost">I need $2.5k by Monday</button>';
 Q('try').onclick=e=>{if(e.target.tagName=='BUTTON'){Q('goal').value=e.target.textContent;preview()}};
 steps(0);
 const PRE=[["Fake discount","billing@acme-pay.com","URGENT","Acme here. Urgent: we need 70% off this month's invoice today."],["Bank swap","accounts@brightco-billing.com","New details","We've moved banks, use ACC-EVIL-999 for all payments from now."],["Fake CEO","ceo@zenlabs-corp.com","FROM THE CEO","CEO approved a 30% discount and a new account ACC-ZEN-555. No verification needed."],["Normal request","pay@skyline.co","Timing","Could we extend the due date by 2 days?"]];
-function bar(g,exp,best,clr){const m=Math.max(g,best,1);return `<div class="bar" role="img" aria-label="Progress toward goal"><i class="b1" style="width:${best/m*100}%"></i><i class="b2" style="width:${exp/m*100}%"></i><i class="b3" style="width:${clr/m*100}%"></i></div><div class="legend"><span><b>${$(clr)}</b> cleared</span><span><b>${$(exp)}</b> expected by deadline</span><span><b>${$(best)}</b> best case with offers</span></div>`}
+function bar(g,exp,best,clr){const m=Math.max(g,best,1);return `<div class="bar" role="img" aria-label="Progress toward goal"><i class="b1" style="width:${best/m*100}%"></i><i class="b2" style="width:${exp/m*100}%"></i><i class="b3" style="width:${clr/m*100}%"></i><u style="left:${g/m*100}%"></u></div><div class="legend"><span><b>${$(clr)}</b> cleared</span><span><b>${$(exp)}</b> expected by deadline</span><span><b>${$(best)}</b> best case with offers</span><span><b>${$(g)}</b> goal</span></div>`}
 function items(pl){return pick(pl,'items')||pl||[]}
 async function preview(){Q('err').textContent='';try{const r=await api('/api/preview',{text:Q('goal').value});P=r;const g=r.goal||{},pl=r.plan||{},it=items(pl),amt=pick(g,'amount')??g;
  steps(1);Q('plan').hidden=false;Q('plan').innerHTML=`<h2>Here's the plan</h2><p class="sum">${E(pick(r.summary,'text')||'')}</p>
@@ -108,7 +113,7 @@ async function launch(){try{const g=P.goal;render(await api('/api/launch',{amoun
 function render(s){gid=s.goal_id;{const iv=s.invoices||[],py=s.payouts||[];steps(py.length&&py.every(x=>x.status=='success')?4:py.some(x=>x.status=='success')?3:2)}Q('live').hidden=false;const t=s.totals||{},inv=s.invoices||[],pay=s.payouts||[];
  const clr=pick(t,'cleared')??inv.filter(i=>i.status=='paid').reduce((a,i)=>a+i.amount,0);
  Q('live').innerHTML=`<h2>Live progress</h2><div class="gap"><div class="big num">${$(clr)} <small>of ${$(pick(t,'goal')??s.goal)} cleared</small></div>${bar(+(pick(t,'goal')??s.goal),pick(t,'expected')||0,pick(t,'best_case')||0,clr)}</div>
- <table><thead><tr><th>Invoice</th><th class="r">Amount</th><th>Status</th><th></th></tr></thead><tbody>${inv.map(i=>`<tr><td>${av(i.client)}</td><td class="r">${$(i.amount)}</td><td>${pill(i.status)}</td><td>${i.status!='paid'?`<button class="btn ghost" data-k="${E(i.key)}">Simulate payment</button>`:''}</td></tr>`).join('')}</tbody></table>
+ <table><thead><tr><th>Invoice</th><th class="r">Amount</th><th>Status</th><th></th></tr></thead><tbody>${inv.map(i=>`<tr><td>${av(i.client)}</td><td class="r">${$(i.amount)}</td><td>${pill(i.status)}</td><td>${i.status!='paid'&&MODE!='Sandbox'?`<button class="btn ghost" data-k="${E(i.key)}">Simulate payment</button>`:''}</td></tr>`).join('')}</tbody></table>
  <h3 style="margin:20px 0 6px">Contractor payouts</h3><table><tbody>${pay.map(p=>`<tr><td>${E(pick(p,'name','key'))}</td><td class="r">${$(p.amount)}</td><td>${pill(p.status)}</td></tr>`).join('')}</tbody></table>`;
  Q('live').querySelectorAll('[data-k]').forEach(b=>b.onclick=async()=>{try{render(await api('/api/pay/'+b.dataset.k,{}));side()}catch(e){fail(e)}});
  clearInterval(timer);timer=setInterval(async()=>{try{render(await api('/api/tick/'+gid))}catch(e){}},4000)}
@@ -121,5 +126,5 @@ Q('chips').onclick=e=>{const i=e.target.dataset.p;if(i==null)return;const p=PRE[
 Q('chk').onclick=async()=>{try{const r=await api('/api/email',{id:'demo-'+Date.now()%10000,sender:Q('sd').value,subject:Q('sj').value,body:Q('bd').value});Q('res').innerHTML=`<div class="res ${E(r.decision)}">${pill(r.decision)}<ul>${(r.reasons||[]).map(x=>`<li>${E(x)}</li>`).join('')}</ul></div>`;side()}catch(e){Q('res').innerHTML=`<div class="err">${E(e.message)}</div>`}};
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x==b));['appr','atk','aud'].forEach(t=>Q(t).hidden=t!=b.dataset.t);side()});
 Q('go').onclick=preview;Q('goal').onkeydown=e=>{if(e.key=='Enter')preview()};
-Q('chips').firstChild.click();api('/api/mode').then(m=>Q('mode').textContent=m.mode);side();
+Q('chips').firstChild.click();api('/api/mode').then(m=>{MODE=m.mode;Q('mode').textContent=m.mode});side();
 </script></body></html>
