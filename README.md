@@ -1,53 +1,110 @@
-# PayPal AI Hackathon - Guarded Invoice & Payout Agent
+# Floatly
 
-An agent that runs one flow: **goal -> plan -> invoices -> payment -> payout**, while a rule-based
-**Guard** stops risky client requests (e.g. a spoofed 70% discount, a swapped bank account).
+**A CFO for freelancers that can't be tricked into giving your money away.**
 
-- **AI** only reads a client's message and extracts a small structured request.
-- **Guard** is deterministic rules (no AI) that decides: `allow`, `needs_approval`, or `block`, with plain-language reasons.
-- **PayPal Sandbox** APIs (Invoicing, Payouts) move the (fake) money.
+Built for the PayPal AI Hackathon 2026 (PayPal Invoicing + Payouts in the sandbox, plus AI).
 
-## Setup (5 min)
-```bash
-python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
+## The problem
+
+Freelancers and small shops don't just get paid late, they get squeezed: rent and contractor payments are due
+Friday, but the client's money arrives next Thursday. Big companies have a finance team for that gap.
+
+The obvious fix is an AI agent that chases clients and moves money. But an agent that reads client emails is an
+attack surface. One reply like "my bank details changed, send it here" or "per our call, take 70% off" can trick a
+naive agent into giving money away.
+
+## What Floatly does
+
+- **Float**: you type a goal ("I need $6,000 by Friday"). Float estimates when each open invoice will really be
+  paid from the client's payment history, and only where you are still short does it offer the cheapest early-pay
+  discount. Every choice comes with a plain-language reason. It sends the invoices through **PayPal Invoicing**,
+  watches PayPal for payment, and pays contractors through **PayPal Payouts** once the money has arrived.
+- **Guard**: every client email goes through a safety layer before anything happens. The AI only *reads* the email
+  into a small structured request. A **deterministic rules engine (no AI)** decides: `allow`, `needs_approval`
+  or `block`. Spoofed senders, huge discounts and swapped bank accounts are stopped, and anything uncertain goes to
+  the owner for one-tap approval.
+
+Safety does not depend on the model being right. If the AI misreads an attack, the worst case is "send to a human".
+
+## How AI is used
+
+| Where | What the AI does | What checks it |
+|---|---|---|
+| Client email -> structured request | Extracts intent, discount %, bank account, due date | Output schema validation (fails closed to "other") + Guard rules |
+| Goal text -> amount + deadline | Reads the amount | Rule-based reader must agree, otherwise we refuse and ask |
+| Plan -> summary | Writes a short explanation | Every `$` figure must exist in the plan, otherwise a template is used |
+
+Model used: `openai/gpt-oss-120b` on Groq's free tier through an OpenAI-compatible API (any compatible model works).
+With no key, a rule-based mock keeps everything runnable offline.
+
+## Architecture
+
+```
+goal text -> goal_parser -> planner -> orchestrator -> PayPal Invoicing (create + send)
+                                            |                     |
+client email -> extractor (AI) -> Guard     +-- poll PayPal status +-> PayPal Payouts (contractors)
+                  (rules)  -> allow / needs_approval / block
+                                            |
+                               SQLite: invoices, payouts, approvals, audit log
+```
+
+Rules the code enforces:
+1. PayPal is the only source of truth for "paid". An email can never mark an invoice paid.
+2. Amounts and due dates come from our records and PayPal, never from email text.
+3. Every PayPal action is idempotent: invoices are keyed in the store, payouts carry a fixed request id, so
+   re-running never double-sends or double-pays.
+4. Outgoing discounts and payouts respect Guard's limits; anything above goes to a human.
+5. Every decision is written to the audit log with its reason.
+
+Guard policy (tunable at the top of `app/guard.py`): discounts above 10% are blocked, 5-10% need approval,
+unknown senders are blocked, unknown bank accounts need approval, due-date extensions over 30 days need approval,
+payouts over 2000 need approval.
+
+## Tools used
+
+- **PayPal Developer Platform (sandbox)**: Invoicing API (create, send, status) and Payouts API (with idempotent
+  request ids).
+- **AI**: Groq-hosted `gpt-oss-120b` via the OpenAI-compatible API.
+- **Zapier** (optional): a webhook tells the owner when an approval is needed or an attack is blocked.
+  Set `ZAPIER_WEBHOOK_URL` to enable it.
+- Python, SQLite.
+<!-- TODO: add every other sponsor tool ONLY once it is really integrated (Render, AG Grid, ...) -->
+
+## Run it
+
+```
+python -m venv .venv
+.venv\Scripts\activate            # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env                                   # Windows: copy .env.example .env
-python -m pytest                                       # 30 tests should pass
-python run_inbox.py                                    # 15 sample emails -> decisions
-```
-Works with no API key (`LLM_PROVIDER=mock`). For a real model set `LLM_PROVIDER=anthropic` (or `openai`),
-add the key in `.env`, `pip install anthropic` (or `openai`), and re-run `python run_inbox.py`.
-**The mock is for plumbing only - judge the parser on a real model.**
+copy .env.example .env            # macOS/Linux: cp .env.example .env
 
-## The contract (change only if you both agree)
-```
-ParsedRequest  {client_id, intent, discount_pct, new_bank_account, new_due_date, raw_message}
-   intent in: discount_request | bank_change | deadline_extension | payment_confirmation | other
-Decision       {decision: allow | needs_approval | block, reasons: [plain-language strings]}
-Plan item      {client_id, amount, due_date}                      (Person B builds the planner)
-Pipeline       process_email(email, clients, call_llm) -> Result(email_id, parsed, decision)
+python -m pytest                  # all tests pass, no keys needed
+python run_float.py simulate      # full offline dry run with a fake PayPal
+python run_float.py ask "I need $6,000 by Friday"
 ```
 
-## Layout
-```
-app/models.py         shared data contract
-app/extractor.py      prompt + validation (fails closed to intent "other")
-app/guard.py          the rules + tunable thresholds at top
-app/pipeline.py       email -> extract -> resolve client -> guard
-app/llm.py            mock | anthropic | openai adapter
-app/paypal_client.py  sandbox auth (A builds Invoicing/Payouts here)
-data/clients.json     6 seeded clients w/ payment history
-data/inbox.json       15 sample emails with expected results (incl. the attack)
-tests/                30 tests;   run_inbox.py = end-to-end demo of the brain
-```
+Web UI (works with no keys when `FLOAT_FAKE=1`):
 
-## Day 1 split
-**Person A:** create PayPal developer account -> Sandbox -> make a business + personal sandbox account ->
-create a REST app and copy Client ID/Secret into `.env` -> run `python check_paypal.py` until it prints OK.
-**Person B:** run `python run_inbox.py` with a real model, fix the prompt in `extractor.py` until all 15 emails pass,
-add more tricky emails to `data/inbox.json`.
-Together: agree this contract, confirm the deadline and sponsor-tool requirements on Devpost.
+```
+python ui/server.py
+```
+<!-- TODO: confirm this is how ui/server.py is started, and that FLOAT_FAKE=1 really switches to the fake PayPal -->
 
-## Rules
-- Sandbox only. `paypal_client.py` refuses to run unless `PAYPAL_MODE=sandbox`.
-- Never commit `.env`. Commit small and often; keep `main` always runnable.
+Real PayPal sandbox: create a free sandbox business and personal account at developer.paypal.com, create an app,
+and fill `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_BUSINESS_EMAIL`, `DEMO_PAYER_EMAIL` in `.env`.
+Then `python run_float.py issue`, pay a few invoices from the sandbox personal account, and
+`python run_float.py check`. The project refuses to run unless `PAYPAL_MODE=sandbox`.
+
+## Honest limitations
+
+- Sandbox only. A production version would need real sender authentication (SPF/DKIM), compliance review,
+  conservative spending caps and human-in-the-loop defaults.
+- The open invoices and client payment histories are seeded demo data.
+- The plan reports a best case (all offers accepted) and any shortfall. It does not claim an acceptance rate.
+- Approving an item in the approvals inbox records and logs the decision. It does not yet change an invoice or
+  bank account automatically.
+- Amounts are treated as USD (the sandbox currency).
+
+## License
+
+MIT, see `LICENSE`.
