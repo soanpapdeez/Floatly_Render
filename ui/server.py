@@ -1,7 +1,8 @@
 """Floatly UI server. From the repo root:  pip install flask  then  python ui/server.py
-  default            -> app.service.build_service(fake=True)  (offline, no keys); falls back to the stand-in
-  FLOAT_REAL=1       -> app.service.build_service()           (real PayPal sandbox)
-  UI_STANDIN=1       -> built-in sample service (use until app/service.py is pushed)
+  default            -> app.service.build_service()           (real PayPal sandbox, needs keys in .env)
+  FLOAT_FAKE=1       -> app.service.build_service(fake=True) (offline, no keys)
+  UI_STANDIN=1       -> built-in sample service (only if app/service.py is missing)
+Render: start command  gunicorn ui.server:web   (put keys in Render env vars, never in the repo)
 """
 import dataclasses, os, re, sys, time
 from pathlib import Path
@@ -86,6 +87,7 @@ class StandIn:
     def decide(s, aid, approve):
         a = next(x for x in s.appr if x["id"] == aid)
         a["status"] = "approved" if approve else "rejected"; s._a("approval", f"#{aid} {a['status']}")
+        a["effect"] = ("Invoice re-sent at the lower amount." if any("iscount" in r for r in a["reasons"]) else "New bank account is now trusted.") if approve else "No change was made."
         return a
 
     def audit(s, n=100):
@@ -97,7 +99,7 @@ def make_service():
         try:
             import app  # noqa: F401  (loads .env)
             from app.service import build_service
-            real = os.getenv("FLOAT_REAL") == "1"
+            real = os.getenv("FLOAT_FAKE") != "1"
             return build_service() if real else build_service(fake=True), ("Sandbox" if real else "Demo mode")
         except Exception as e:  # service.py missing or broken
             print(f"[ui] using the stand-in service ({type(e).__name__}: {e})")
@@ -138,4 +140,4 @@ def audit(): return jsonify(svc.audit(100))
 
 if __name__ == "__main__":
     print(f"Floatly UI ({MODE}) -> http://127.0.0.1:5000")
-    web.run(port=5000, debug=False)
+    web.run(host=os.getenv("HOST", "127.0.0.1"), port=int(os.getenv("PORT", "5000")), debug=False)
