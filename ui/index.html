@@ -64,6 +64,7 @@ label{display:block;font-size:13px;color:var(--mute);margin:12px 0 4px}.f{width:
 .btn:disabled{opacity:.6;cursor:progress}
 .ag-theme-quartz{--ag-font-family:"Public Sans",system-ui,sans-serif;--ag-accent-color:#0B5D4B;--ag-background-color:transparent;--ag-header-background-color:transparent;--ag-foreground-color:#0F2420;--ag-header-foreground-color:#55655F;--ag-border-color:#DDE5E1;--ag-row-hover-color:#F7FAF9;--ag-font-size:15px;--ag-borders:none;margin-top:6px}
 .ag-theme-quartz{--ag-header-column-separator-display:none}.ag-theme-quartz .ag-cell{display:flex;align-items:center}.ag-theme-quartz .ag-right-aligned-cell{justify-content:flex-end}.log b{text-transform:capitalize}
+.ag-header-cell::after,.ag-header-group-cell::after{display:none!important}.ag-header-cell-resize{display:none}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/styles/ag-grid.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/styles/ag-theme-quartz.css"><script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/ag-grid-community.min.js"></script></head><body>
@@ -145,7 +146,8 @@ async function appr(){const a=await api('/api/approvals?status=pending');Q('nap'
 const hum=e=>String(e||'').replace(/_/g,' ');
 const tm=t=>{const n=+t;return n>1e9?new Date(n*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}):E(t||'')};
 function fmt(d){try{if(typeof d=='string')d=JSON.parse(d)}catch(e){return E(d)}if(!d||typeof d!='object')return E(d??'');if(d.reason)return E((d.client?d.client+': ':'')+d.reason);if(d.reasons)return E([].concat(d.reasons).join(' '));return E(Object.entries(d).filter(([k])=>!/key|paypal|id$/i.test(k)).map(([k,v])=>k.replace(/_/g,' ')+': '+(typeof v=='object'?JSON.stringify(v):v)).join(' · '))}
-async function aud(){const a=await api('/api/audit');Q('aud').innerHTML=a.length?a.map(x=>`<div class="log"><b>${E(hum(x.event))}</b> <span>${tm(x.ts)}</span><div>${fmt(x.details)}</div></div>`).join(''):'<p class="hint">Every decision is logged here with its reason.</p>'}
+async function aud(){const a=await api('/api/audit'),seen={},g=[];for(const x of a){if(/waiting/i.test(x.event)){const k=x.event+JSON.stringify(x.details);if(seen[k]){seen[k].n++;continue}seen[k]={x,n:1};g.push(seen[k])}else g.push({x,n:1})}
+Q('aud').innerHTML=g.length?g.map(({x,n})=>`<div class="log"><b>${E(hum(x.event))}</b>${n>1?` <span>×${n}</span>`:''} <span>${tm(x.ts)}</span><div>${fmt(x.details)}</div></div>`).join(''):'<p class="hint">Every decision is logged here with its reason.</p>'}
 const side=()=>{appr();aud()};
 Q('chips').innerHTML=PRE.map((p,i)=>`<button class="btn ghost" data-p="${i}">${p[0]}</button>`).join('');
 Q('chips').onclick=e=>{const i=e.target.dataset.p;if(i==null)return;const p=PRE[i];Q('sd').value=p[1];Q('sj').value=p[2];Q('bd').value=p[3]};
