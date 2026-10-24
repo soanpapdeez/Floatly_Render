@@ -173,3 +173,11 @@ def get_payout_status(batch_id: str) -> str:
     raw = (items[0].get("transaction_status") if items
            else data.get("batch_header", {}).get("batch_status", "UNKNOWN"))
     return str(raw).lower()
+def cancel_invoice(invoice_id: str, note: str = "Cancelled by Floatly",
+                   notify_client: bool = False) -> bool:
+    """Cancels a SENT invoice (a draft can't be cancelled). Returns True when PayPal accepts it."""
+    body = {"subject": "Invoice cancelled", "note": note,
+            "send_to_invoicer": False, "send_to_recipient": notify_client}
+    _check(requests.post(f"{base_url()}/v2/invoicing/invoices/{invoice_id}/cancel",
+                         headers=_headers(), json=body, timeout=TIMEOUT))
+    return True
