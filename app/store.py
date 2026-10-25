@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS payouts (
   batch_id TEXT, status TEXT, created_at REAL);
 CREATE TABLE IF NOT EXISTS audit (
   id INTEGER PRIMARY KEY AUTOINCREMENT, ts REAL, event TEXT, details TEXT);
+CREATE TABLE IF NOT EXISTS known_accounts (
+  client_id TEXT, account TEXT, approved_at REAL, PRIMARY KEY (client_id, account));
 CREATE TABLE IF NOT EXISTS approvals (
   id INTEGER PRIMARY KEY AUTOINCREMENT, created_at REAL, email_id TEXT, client_id TEXT, intent TEXT,
   payload TEXT, reasons TEXT, status TEXT, decided_at REAL, note TEXT);
@@ -47,6 +49,21 @@ class Store:
     def goal_ids(self):
         rows = self.conn.execute("SELECT goal_id FROM invoices GROUP BY goal_id ORDER BY MIN(created_at)").fetchall()
         return [r["goal_id"] for r in rows]
+
+    def unpaid_invoices_for_client(self, client_id):
+        """Newest first. Only invoices PayPal still reports as unpaid."""
+        rows = self.conn.execute("SELECT * FROM invoices WHERE client_id=? AND status='unpaid' "
+                                 "ORDER BY created_at DESC, key", (client_id,)).fetchall()
+        return [dict(r) for r in rows]
+
+    # ---- bank accounts the owner has approved
+    def add_known_account(self, client_id, account):
+        self.conn.execute("INSERT OR IGNORE INTO known_accounts VALUES (?,?,?)", (client_id, account, time.time()))
+        self.conn.commit()
+
+    def list_known_accounts(self):
+        rows = self.conn.execute("SELECT client_id, account FROM known_accounts").fetchall()
+        return [(r["client_id"], r["account"]) for r in rows]
 
     # ---- payouts
     def get_payout(self, key):

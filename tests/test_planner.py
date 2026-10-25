@@ -1,4 +1,5 @@
 import json
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -71,3 +72,30 @@ def test_every_item_has_a_reason(clients, invoices):
 def test_unknown_client_raises(clients):
     with pytest.raises(ValueError):
         make_plan(1000, "2026-10-16", [OpenInvoice("X", "ghost", 100, "2026-10-14")], clients)
+
+
+def test_default_load_is_not_shifted(invoices):
+    assert invoices[0].due_date == "2026-10-14"            # tests rely on the fixed seed dates
+
+
+def test_shifting_moves_every_due_date_by_the_same_amount(invoices):
+    moved = load_open_invoices(today=date(2026, 10, 24))                 # 12 days after the anchor
+    assert [i.invoice_id for i in moved] == [i.invoice_id for i in invoices]
+    assert moved[0].due_date == "2026-10-26"
+    assert all((date.fromisoformat(m.due_date) - date.fromisoformat(o.due_date)).days == 12
+               for m, o in zip(moved, invoices))
+
+
+def test_rebased_demo_still_produces_a_sensible_plan(clients):
+    inv = load_open_invoices(today=date(2026, 10, 24))
+    plan = make_plan(6000, "2026-10-30", inv, clients)                   # "by Friday" typed on Saturday 24 Oct
+    offers = [i for i in plan.items if i.action == "early_pay_offer"]
+    assert plan.covered and plan.expected_on_track == 3050
+    assert 1 <= len(offers) <= 2
+    assert all(o.discount_pct <= guard.APPROVAL_DISCOUNT_PCT for o in offers)
+
+
+def test_unshifted_seed_data_would_show_no_offers_today(clients, invoices):
+    # documents WHY rebasing exists: stale due dates make everything look "on track"
+    plan = make_plan(6000, "2026-10-30", invoices, clients)
+    assert not [i for i in plan.items if i.action == "early_pay_offer"]
