@@ -3,98 +3,89 @@
 <title>Float</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F4F6F5;--ink:#0F2420;--mute:#55655F;--line:#DDE5E1;--sf:#fff;--blue:#0B5D4B;--blue2:#E3F1EC;--green:#14804F;--red:#B93A2E;--amber:#9A5B09;--r:8px;--r2:14px;--sh:0 1px 2px rgba(15,36,32,.05),0 12px 28px -14px rgba(15,36,32,.20)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Public Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+:root{--bg:#F5F4FB;--ink:#16132E;--mute:#6B6785;--line:#E6E3F3;--sf:#fff;--v:#6D4AFF;--v2:#4F46E5;--vs:#EFEBFF;--green:#12805C;--red:#C0364F;--amber:#A8650C;--r:10px;--r2:20px;--sh:0 1px 2px rgba(22,19,46,.04),0 18px 40px -22px rgba(79,70,229,.28)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Public Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(60% 40% at 85% -5%,rgba(109,74,255,.16),transparent 70%),radial-gradient(45% 35% at 0% 10%,rgba(79,70,229,.09),transparent 70%)}
 h1,h2,h3,.num{font-family:"Bricolage Grotesque","Public Sans",sans-serif;margin:0;letter-spacing:-.02em}
-button,input,textarea{font:inherit;color:inherit}::selection{background:var(--blue2)}
-:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-header{display:flex;align-items:center;gap:18px;padding:0 32px;height:64px;border-bottom:1px solid var(--line);background:var(--sf)}
-header h1{font-size:24px;display:inline-flex;align-items:center;gap:10px}.tag{color:var(--mute);font-size:14px}
-.mode{margin-left:auto;font-size:13px;font-weight:600;border:1px solid var(--line);border-radius:99px;padding:4px 14px;display:inline-flex;align-items:center;background:var(--bg)}
-.mode::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:8px}
-main{display:grid;grid-template-columns:minmax(0,1fr) 392px;gap:48px;max-width:1280px;margin:0 auto;padding:40px 32px}
-@media(max-width:900px){main{grid-template-columns:1fr;padding:20px 16px;gap:24px}header{padding:0 16px}.tag{display:none}aside{position:static!important}}
-section{margin-bottom:44px;border-top:2px solid var(--ink);padding-top:20px}h2{font-size:22px;margin-bottom:14px}
-main>div>section:first-child h2{font-size:36px;line-height:1.1;margin-bottom:20px}
-.ask{display:flex;box-shadow:var(--sh);border-radius:var(--r2)}
-.ask input{flex:1;min-width:0;font-size:22px;padding:18px 22px;border:1px solid var(--line);border-right:0;border-radius:var(--r2) 0 0 var(--r2);background:var(--sf)}
-.ask input:focus{outline:none;border-color:var(--blue)}
-.ask .btn{border-radius:0 var(--r2) var(--r2) 0;background:var(--blue);padding:0 28px;font-size:16px}.ask .btn:hover{background:#084839}
-.btn{background:var(--ink);color:#fff;border:0;border-radius:var(--r);padding:12px 20px;cursor:pointer;font-weight:600;transition:background .15s}.btn:hover{background:var(--blue)}.btn:active{transform:translateY(1px)}
-.btn.ghost{background:var(--sf);color:var(--ink);border:1px solid var(--line);padding:6px 12px;font-weight:500}.btn.ghost:hover{border-color:var(--ink);background:var(--sf)}
-#launch{padding:14px 28px;font-size:16px;background:var(--blue)}#launch:hover{background:#084839}
-.hint{color:var(--mute);font-size:13px;margin-top:10px}
-.gap{margin:6px 0 22px}.gap .big{font-size:56px;line-height:1.05;font-weight:700;letter-spacing:-.03em}.gap .big small{font-size:17px;color:var(--mute);font-weight:500;letter-spacing:0}
-.bar{position:relative;height:26px;background:#E4E9F1;border-radius:13px;overflow:hidden;margin:16px 0 12px}
-.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:13px;transition:width .6s ease}.b1{background:repeating-linear-gradient(45deg,#CFE6DD 0 6px,#E6F2ED 6px 12px)}.b2{background:#86C6AD}.b3{background:var(--blue)}
-.legend{display:flex;gap:22px;flex-wrap:wrap;font-size:13px;color:var(--mute)}.legend b{color:var(--ink);font-size:15px}
-.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--blue)}
-.legend span:nth-child(2)::before{background:#86C6AD}
-.legend span:nth-child(3)::before{background:repeating-linear-gradient(45deg,#CFE6DD 0 3px,#E6F2ED 3px 6px);border:1px solid #BFDCCF}
-.legend span:nth-child(4)::before{width:2px;border-radius:0;background:var(--ink)}
-.bar u{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}#plan .row{margin-top:24px}
-table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:14px 10px;border-bottom:1px solid var(--line);vertical-align:middle}th{font-size:13px;color:var(--mute);font-weight:500;padding-top:6px}
-tbody tr:hover td{background:#F7FAF9}td.r,th.r,.num{text-align:right;font-variant-numeric:tabular-nums}.num{text-align:left}
-.why{color:var(--mute);font-size:14px;max-width:46ch;line-height:1.5}
-.av{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--blue2);color:var(--blue);font-weight:700;font-size:13px;margin-right:10px;text-transform:uppercase}.cl{text-transform:capitalize;font-weight:600}
-.pill{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:2px 11px;font-size:13px;font-weight:600;background:#E9EDF3}.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-.paid,.success,.allow,.approved{background:#D9F2E8;color:var(--green)}.block,.rejected{background:#F8DDD9;color:var(--red)}.needs_approval,.waiting,.pending,.unpaid{background:#FBEBCF;color:var(--amber)}
-.offer{color:var(--blue);font-weight:600}.sum{font-size:18px;line-height:1.5;margin:0 0 20px;max-width:60ch}
-aside{position:sticky;top:24px;align-self:start;background:var(--sf);border:1px solid var(--line);border-radius:var(--r2);padding:6px 22px 22px;box-shadow:var(--sh)}
-.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0 -22px 18px;padding:0 14px}.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:14px 10px;cursor:pointer;color:var(--mute);font-weight:600}
-.tabs button[aria-selected=true]{color:var(--ink);border-color:var(--blue)}
-label{display:block;font-size:13px;color:var(--mute);margin:12px 0 4px}.f{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--sf)}.f:focus{outline:none;border-color:var(--blue)}
-.chips{display:flex;gap:6px;flex-wrap:wrap}.res{margin-top:16px;padding:14px 16px;border-left:4px solid var(--line);border-radius:var(--r);background:var(--bg)}.res ul{margin:8px 0 0;padding-left:18px}
-.res.block{border-color:var(--red);background:#FDF1EF}.res.allow{border-color:var(--green);background:#EEF9F4}.res.needs_approval{border-color:var(--amber);background:#FEF6E7}
-.item{padding:14px 0;border-bottom:1px solid var(--line)}.row{display:flex;gap:8px;margin-top:10px}.log{font-size:13px;padding:8px 0;border-bottom:1px solid var(--line)}.log span{color:var(--mute)}
-.err{color:var(--red);font-size:14px;margin-top:10px}[hidden]{display:none!important}
-
-.tabs button:focus-visible{outline-offset:-3px;border-radius:6px}
-.try{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center;color:var(--mute);font-size:13px}
-.steps{list-style:none;display:flex;padding:0;margin:30px 0 0;counter-reset:s}
-.steps li{flex:1;position:relative;padding-top:30px;color:var(--mute);font-size:14px;font-weight:600}
-.steps li::before{content:counter(s);counter-increment:s;position:absolute;top:0;left:0;width:22px;height:22px;border-radius:50%;background:var(--sf);border:1.5px solid var(--line);display:grid;place-items:center;font-size:11px;z-index:1}
-.steps li::after{content:"";position:absolute;top:10px;left:30px;right:10px;height:2px;background:var(--line)}.steps li:last-child::after{display:none}
-.steps li.now{color:var(--ink)}.steps li.now::before{border-color:var(--blue);color:var(--blue)}
-.steps li.done{color:var(--ink)}.steps li.done::before{content:"\2713";background:var(--green);border-color:var(--green);color:#fff}.steps li.done::after{background:var(--green)}
-.rules td:first-child{width:170px}
-#toasts{position:fixed;right:24px;bottom:24px;display:grid;gap:8px;z-index:9}
-.toast{background:var(--ink);color:#fff;padding:12px 18px;border-radius:var(--r);box-shadow:var(--sh);max-width:360px;font-size:14px;border-left:4px solid #2FBF84;animation:in .25s ease}.toast.bad{border-color:#E5604F}
-@keyframes in{from{opacity:0;transform:translateY(8px)}}
-.btn:disabled{opacity:.6;cursor:progress}
-.ag-theme-quartz{--ag-font-family:"Public Sans",system-ui,sans-serif;--ag-accent-color:#0B5D4B;--ag-background-color:transparent;--ag-header-background-color:transparent;--ag-foreground-color:#0F2420;--ag-header-foreground-color:#55655F;--ag-border-color:#DDE5E1;--ag-row-hover-color:#F7FAF9;--ag-font-size:15px;--ag-borders:none;margin-top:6px}
-.ag-theme-quartz{--ag-header-column-separator-display:none}.ag-theme-quartz .ag-cell{display:flex;align-items:center}.ag-theme-quartz .ag-right-aligned-cell{justify-content:flex-end}.log b{text-transform:capitalize}
-.ag-header-cell::after,.ag-header-group-cell::after{display:none!important}.ag-header-cell-resize{display:none}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+button,input,textarea{font:inherit;color:inherit}::selection{background:var(--vs)}:focus-visible{outline:2px solid var(--v);outline-offset:2px}
+[hidden]{display:none!important}
+.top{display:flex;align-items:center;gap:16px;padding:0 32px;height:68px;max-width:1320px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:10px;font:700 24px "Bricolage Grotesque",sans-serif}.tag{color:var(--mute);font-size:14px}
+.mode{margin-left:auto;font-size:13px;font-weight:600;border:1px solid var(--line);border-radius:99px;padding:5px 14px;background:var(--sf);display:inline-flex;align-items:center}
+.mode::before{content:"";width:8px;height:8px;border-radius:50%;background:#2FBF84;margin-right:8px;box-shadow:0 0 0 4px rgba(47,191,132,.18)}
+.bento{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-flow:dense;gap:20px;max-width:1320px;margin:0 auto;padding:8px 32px 56px}
+.tile{background:var(--sf);border:1px solid var(--line);border-radius:var(--r2);padding:26px;box-shadow:var(--sh);min-width:0;transition:box-shadow .2s,transform .2s}
+.tile:hover{box-shadow:0 1px 2px rgba(22,19,46,.05),0 24px 48px -24px rgba(79,70,229,.36)}
+.tile h2{font-size:19px;margin-bottom:14px}.tile>small,.cap{color:var(--mute);font-size:13px}
+.s8{grid-column:span 8}.s7{grid-column:span 7}.s5{grid-column:span 5}.s4{grid-column:span 4}.s3{grid-column:span 3}.s12{grid-column:span 12}.r2{grid-row:span 2}
+.hero{background:linear-gradient(135deg,#1E1A4B,#2B2487 55%,#4430C9);color:#fff;border:0}.hero h1{font-size:38px;line-height:1.08;margin-bottom:20px;max-width:16ch}
+.ask{display:flex;border-radius:14px;background:rgba(255,255,255,.96);padding:6px;box-shadow:0 12px 30px -12px rgba(0,0,0,.5)}
+.ask input{flex:1;min-width:0;border:0;background:none;font-size:20px;padding:12px 16px;color:var(--ink)}.ask input:focus{outline:none}
+.btn{background:var(--ink);color:#fff;border:0;border-radius:var(--r);padding:11px 20px;cursor:pointer;font-weight:600;transition:background .15s,transform .1s}.btn:hover{background:var(--v2)}.btn:active{transform:translateY(1px)}.btn:disabled{opacity:.6;cursor:progress}
+.ask .btn{background:var(--v);border-radius:10px;padding:0 24px}.ask .btn:hover{background:var(--v2)}
+.btn.ghost{background:var(--sf);color:var(--ink);border:1px solid var(--line);padding:6px 12px;font-weight:500}.btn.ghost:hover{border-color:var(--v);color:var(--v2);background:var(--sf)}
+.try{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center;color:#C9C4F2;font-size:13px}.try .btn.ghost{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#fff}.try .btn.ghost:hover{background:rgba(255,255,255,.22)}
+.hero .err{color:#FFB4C0}
+.steps{list-style:none;display:flex;padding:0;margin:22px 0 0;counter-reset:s}
+.steps li{flex:1;position:relative;padding-top:28px;color:#B7B1E8;font-size:13px;font-weight:600}
+.steps li::before{content:counter(s);counter-increment:s;position:absolute;top:0;left:0;width:20px;height:20px;border-radius:50%;background:transparent;border:1.5px solid rgba(255,255,255,.35);display:grid;place-items:center;font-size:11px;z-index:1}
+.steps li::after{content:"";position:absolute;top:9px;left:28px;right:8px;height:2px;background:rgba(255,255,255,.2)}.steps li:last-child::after{display:none}
+.steps li.now{color:#fff}.steps li.now::before{border-color:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.18)}.steps li.done{color:#fff}.steps li.done::before{content:"\2713";background:#2FBF84;border-color:#2FBF84;color:#06281c}.steps li.done::after{background:#2FBF84}
+.stat b{display:block;font-size:34px;line-height:1.1;margin:6px 0 2px}.stat span{color:var(--mute);font-size:13px;font-weight:500}.stat small{color:var(--mute)}
+.big{font-size:44px;font-weight:700;letter-spacing:-.03em;line-height:1.05}.big small{font-size:15px;color:var(--mute);font-weight:500;letter-spacing:0}
+.bar{position:relative;height:12px;background:#ECE9F8;border-radius:6px;overflow:hidden;margin:16px 0 10px}.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;transition:width .6s ease}
+.b1{background:repeating-linear-gradient(45deg,#D9D1FF 0 5px,#EEEAFF 5px 10px)}.b2{background:#B5A4FF}.b3{background:var(--v)}.bar u{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--mute)}.legend b{color:var(--ink);font-size:14px}
+.legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px;background:var(--v)}.legend span:nth-child(2)::before{background:#B5A4FF}
+.legend span:nth-child(3)::before{background:repeating-linear-gradient(45deg,#D9D1FF 0 3px,#EEEAFF 3px 6px)}.legend span:nth-child(4)::before{width:2px;border-radius:0;background:var(--ink)}
+.ab{display:grid;grid-template-columns:84px 1fr 64px;gap:10px;align-items:center;font-size:13px;margin:9px 0}.ab i{display:block;height:10px;border-radius:5px;background:#CFC6FF}.ab i.paid{background:var(--v)}.ab .cl{font-weight:600}.ab em{font-style:normal;text-align:right;color:var(--mute)}
+.seg{display:flex;height:10px;border-radius:5px;overflow:hidden;background:#ECE9F8;margin:14px 0 8px}.seg i{display:block}.kv{display:flex;gap:28px;flex-wrap:wrap}.kv b{font:700 26px "Bricolage Grotesque";display:block}.kv span{font-size:13px;color:var(--mute)}
+table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:12px 8px;border-bottom:1px solid var(--line);vertical-align:middle}th{font-size:12.5px;color:var(--mute);font-weight:500}tbody tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}.why{color:var(--mute);font-size:14px;max-width:52ch}.hint{color:var(--mute);font-size:13px;margin-top:10px}.sum{font-size:17px;max-width:70ch;margin:0 0 16px}
+.av{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--vs);color:var(--v2);font-weight:700;font-size:13px;margin-right:10px;text-transform:uppercase}.cl{text-transform:capitalize;font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:2px 11px;font-size:12.5px;font-weight:600;background:#EEEDF6}.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.paid,.success,.allow,.approved{background:#DDF3EA;color:var(--green)}.block,.rejected,.failed{background:#FBE0E6;color:var(--red)}.needs_approval,.waiting,.pending,.unpaid,.submitted{background:#FBEBCF;color:var(--amber)}.offer{color:var(--v2);font-weight:600}
+.tl{list-style:none;margin:0;padding:0}.tl>li{position:relative;padding:0 0 18px 34px}.tl>li::before{content:"";position:absolute;left:9px;top:22px;bottom:-4px;width:2px;background:var(--line)}.tl>li:last-child::before{display:none}
+.tl .dot{position:absolute;left:0;top:4px;width:20px;height:20px;border-radius:50%;background:var(--sf);border:2px solid var(--line)}.tl .done .dot{background:var(--v);border-color:var(--v);box-shadow:0 0 0 4px var(--vs)}.tl .now .dot{border-color:var(--v)}
+.tl details{border:1px solid var(--line);border-radius:14px;padding:12px 16px;background:#FCFBFF}.tl summary{cursor:pointer;display:flex;justify-content:space-between;gap:8px;font-weight:600;list-style:none}.tl summary::-webkit-details-marker{display:none}.tl summary span{color:var(--mute);font-weight:400;font-size:13px}
+.ev{font-size:13.5px;padding:8px 0;border-top:1px solid var(--line)}.ev:first-of-type{margin-top:10px}.ev b{text-transform:capitalize}.ev span{color:var(--mute);margin-left:6px}.ev div{color:var(--mute)}
+.docs{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}.doc{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--sf);min-width:190px;flex:1}.doc i{font-style:normal;font-size:11.5px;font-weight:700;color:var(--v2);background:var(--vs);border-radius:6px;padding:1px 7px}.doc b{display:block;margin:6px 0 0;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.doc span{font-size:12.5px;color:var(--mute)}.doc div{margin-top:8px;display:flex;gap:6px}
+.empty{color:var(--mute);font-size:14px;padding:14px;border:1px dashed var(--line);border-radius:12px;background:#FCFBFF}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:-8px 0 16px}.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;cursor:pointer;color:var(--mute);font-weight:600}.tabs button[aria-selected=true]{color:var(--ink);border-color:var(--v)}.tabs button:focus-visible{outline-offset:-3px;border-radius:6px}
+label{display:block;font-size:13px;color:var(--mute);margin:12px 0 4px}.f{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--sf)}.f:focus{outline:none;border-color:var(--v);box-shadow:0 0 0 3px var(--vs)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.row{display:flex;gap:8px;margin-top:10px}.res{margin-top:16px;padding:14px 16px;border-left:4px solid var(--line);border-radius:var(--r);background:#FAFAFD}.res ul{margin:8px 0 0;padding-left:18px}.res.block{border-color:var(--red);background:#FEF3F5}.res.allow{border-color:var(--green);background:#F1FAF6}.res.needs_approval{border-color:var(--amber);background:#FEF8EC}
+.item{padding:14px 0;border-bottom:1px solid var(--line)}.log{font-size:13px;padding:8px 0;border-bottom:1px solid var(--line)}.log span{color:var(--mute)}.log b{text-transform:capitalize}#aud{max-height:340px;overflow:auto}.err{color:var(--red);font-size:14px;margin-top:10px}
+#toasts{position:fixed;right:24px;bottom:24px;display:grid;gap:8px;z-index:30}.toast{background:var(--ink);color:#fff;padding:12px 18px;border-radius:var(--r);box-shadow:var(--sh);max-width:360px;font-size:14px;border-left:4px solid #2FBF84;animation:in .25s ease}.toast.bad{border-color:#FF7A90}@keyframes in{from{opacity:0;transform:translateY(8px)}}
+#scrim{position:fixed;inset:0;background:rgba(22,19,46,.4);z-index:40}#drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--sf);z-index:41;padding:26px;overflow:auto;box-shadow:-24px 0 60px -20px rgba(22,19,46,.4)}
+.ag-theme-quartz{--ag-font-family:"Public Sans",system-ui,sans-serif;--ag-accent-color:#6D4AFF;--ag-background-color:transparent;--ag-header-background-color:transparent;--ag-foreground-color:#16132E;--ag-header-foreground-color:#6B6785;--ag-border-color:#E6E3F3;--ag-row-hover-color:#F7F5FF;--ag-font-size:14.5px;--ag-borders:none}.ag-theme-quartz .ag-cell{display:flex;align-items:center}.ag-theme-quartz .ag-right-aligned-cell{justify-content:flex-end}.ag-header-cell::after,.ag-header-group-cell::after{display:none!important}.ag-header-cell-resize{display:none}
+@media(max-width:1100px){.bento{grid-template-columns:repeat(6,1fr);padding:8px 20px 40px}.s8,.s7,.s12{grid-column:span 6}.s5,.s4{grid-column:span 3}.s3{grid-column:span 3}.r2{grid-row:auto}.top{padding:0 20px}}
+@media(max-width:700px){.bento{grid-template-columns:1fr;gap:14px;padding:8px 14px 32px}.bento>*{grid-column:1/-1!important}.hero h1{font-size:30px}.ask{flex-direction:column;gap:6px}.ask .btn{padding:12px}.tag{display:none}.tile{padding:20px}.steps li{font-size:11px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/styles/ag-grid.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/styles/ag-theme-quartz.css"><script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/ag-grid-community.min.js"></script></head><body>
-<header><h1><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="8" fill="#0B5D4B"/><path d="M5 16c3-6 5 3 9-2s5 2 9-3" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>Float</h1><span class="tag">Your cash flow agent. Its limits live outside the AI.</span><span class="mode" id="mode">…</span></header>
-<main>
-<div>
-  <section><h2>What do you need, and by when?</h2>
-    <div class="ask"><input id="goal" value="I need $6k by Friday" aria-label="Goal"><button class="btn" id="go">Preview plan</button></div>
-    <div class="err" id="err"></div><div class="try" id="try"></div><ol class="steps" id="steps"></ol></section>
-  <section id="plan" hidden></section>
-  <section id="live" hidden></section>
-  <section id="rules"><h2>What Guard enforces</h2><table class="rules"><tbody>
-  <tr><td><span class="pill block">Blocked</span></td><td>A discount above 10%</td></tr>
-  <tr><td><span class="pill needs_approval">Needs approval</span></td><td>A discount above 5%</td></tr>
-  <tr><td><span class="pill block">Blocked</span></td><td>An email from an address that isn't known for that client</td></tr>
-  <tr><td><span class="pill needs_approval">Needs approval</span></td><td>A new bank account, verified through another channel first</td></tr>
-  <tr><td><span class="pill allow">Allowed</span></td><td>Anything that passes every check above</td></tr></tbody></table>
-  <p class="hint">These limits are plain code outside the AI. A clever email can't talk its way past them.</p></section>
-</div>
-<div id="toasts" aria-live="polite"></div><aside>
-  <div class="tabs" role="tablist"><button role="tab" data-t="appr" aria-selected="true">Approvals <span id="nap"></span></button><button role="tab" data-t="atk" aria-selected="false">Attack test</button><button role="tab" data-t="aud" aria-selected="false">Audit</button></div>
+<div id="toasts" aria-live="polite"></div>
+<header class="top"><div class="brand"><svg width="30" height="30" viewBox="0 0 28 28" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7C5CFF"/><stop offset="1" stop-color="#4F46E5"/></linearGradient></defs><rect width="28" height="28" rx="8" fill="url(#g)"/><path d="M5 16c3-6 5 3 9-2s5 2 9-3" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>Float</div><span class="tag">Your cash flow agent. Its limits live outside the AI.</span><span class="mode" id="mode">…</span></header>
+<main class="bento">
+ <section class="tile hero s8"><h1>What do you need, and by when?</h1>
+  <div class="ask"><input id="goal" value="I need $6k by Friday" aria-label="Goal"><button class="btn" id="go">Preview plan</button></div>
+  <div class="try" id="try"></div><div class="err" id="err"></div><ol class="steps" id="steps"></ol></section>
+ <section class="tile s4" id="bal"></section>
+ <section class="tile s5 r2" id="ana"></section><section class="tile stat s3" id="vol"></section><section class="tile stat s4" id="out"></section><section class="tile s7" id="ok"></section>
+ <section class="tile s8"><h2>Payment story</h2><ol class="tl" id="tl"></ol></section>
+ <section class="tile s4"><h2>Documents</h2><div id="docl"></div></section>
+ <section class="tile s12" id="plan" hidden></section>
+ <section class="tile s7" id="live" hidden></section>
+ <section class="tile s5"><div class="tabs" role="tablist"><button role="tab" data-t="appr" aria-selected="true">Approvals <span id="nap"></span></button><button role="tab" data-t="atk" aria-selected="false">Attack test</button><button role="tab" data-t="aud" aria-selected="false">Audit</button></div>
   <div id="appr"></div>
-  <div id="atk" hidden>
-    <div class="chips" id="chips"></div>
-    <label for="sd">From</label><input class="f" id="sd"><label for="sj">Subject</label><input class="f" id="sj"><label for="bd">Message</label><textarea class="f" id="bd" rows="4"></textarea>
-    <div class="row"><button class="btn" id="chk">Check this email</button></div><div id="res"></div>
-  </div>
-  <div id="aud" hidden></div>
-</aside>
+  <div id="atk" hidden><div class="chips" id="chips"></div><label for="sd">From</label><input class="f" id="sd"><label for="sj">Subject</label><input class="f" id="sj"><label for="bd">Message</label><textarea class="f" id="bd" rows="4"></textarea><div class="row"><button class="btn" id="chk">Check this email</button></div><div id="res"></div></div>
+  <div id="aud" hidden></div></section>
+ <section class="tile s12" id="rules"><h2>What Guard enforces</h2><table class="rules"><tbody>
+  <tr><td><span class="pill block">Blocked</span></td><td>A discount above 10%</td></tr><tr><td><span class="pill needs_approval">Needs approval</span></td><td>A discount above 5%</td></tr>
+  <tr><td><span class="pill block">Blocked</span></td><td>An email from an address that isn't known for that client</td></tr><tr><td><span class="pill needs_approval">Needs approval</span></td><td>A new bank account, verified through another channel first</td></tr>
+  <tr><td><span class="pill allow">Allowed</span></td><td>Anything that passes every check above</td></tr></tbody></table><p class="hint">These limits are plain code outside the AI. A clever email can't talk its way past them.</p></section>
 </main>
+<div id="scrim" hidden></div><aside id="drawer" hidden></aside>
 <script>
 const $=n=>'$'+Number(n||0).toLocaleString('en-US',{maximumFractionDigits:2}),E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),Q=id=>document.getElementById(id);
 const pick=(o,...k)=>{for(const x of k)if(o&&o[x]!=null)return o[x]};
@@ -140,7 +131,7 @@ function render(s){gid=s.goal_id;Q('live').hidden=false;const t=s.totals||{},inv
   Q('invgrid').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{b.disabled=true;payInv(b.dataset.k)});
  }
  Q('lv-pay').innerHTML=`<h3 style="margin:24px 0 6px">Contractor payouts</h3><table><tbody>${pay.map(p=>`<tr><td>${av(pn(p))}</td><td class="r">${$(p.amount)}</td><td>${pill(p.status)}</td></tr>`).join('')}</tbody></table>`;
- clearInterval(timer);timer=setInterval(async()=>{try{render(await api('/api/tick/'+gid))}catch(e){}},4000)}
+ stats(s);story();clearInterval(timer);timer=setInterval(async()=>{try{render(await api('/api/tick/'+gid))}catch(e){}},4000)}
 async function appr(){const a=await api('/api/approvals?status=pending');Q('nap').textContent=a.length?`(${a.length})`:'';Q('appr').innerHTML=a.length?a.map(x=>`<div class="item"><b>${E(x.client_id||'Unknown client')} · ${E(String(x.intent||'').replace(/_/g,' '))}</b><div class="why">${E((x.payload&&x.payload.sender)||x.sender||'')}${x.payload&&x.payload.discount_pct?' · asks '+E(x.payload.discount_pct)+'% off':''}${x.payload&&x.payload.new_bank_account?' · new account '+E(x.payload.new_bank_account):''}</div><ul class="why">${(x.reasons||[]).map(r=>`<li>${E(r)}</li>`).join('')}</ul><div class="row"><button class="btn" data-a="1" data-i="${x.id}">Approve</button><button class="btn ghost" data-a="0" data-i="${x.id}">Reject</button></div></div>`).join('')+'<p class="hint">Approving records your decision. It does not move money yet.</p>':'<p class="hint">Nothing waiting. Emails that need your decision show up here.</p>';
  Q('appr').querySelectorAll('[data-i]').forEach(b=>b.onclick=async()=>{try{const ok=b.dataset.a=='1',r=await api('/api/decide',{id:+b.dataset.i,approve:ok});const ef=r&&r.effect;toast((ok?'Approved. ':'Rejected. ')+(ef?(typeof ef=='string'?ef:JSON.stringify(ef)):'Decision recorded.'));side()}catch(e){fail(e)}})}
 const hum=e=>String(e||'').replace(/_/g,' ');
@@ -148,7 +139,37 @@ const tm=t=>{const n=+t;return n>1e9?new Date(n*1000).toLocaleTimeString([],{hou
 function fmt(d){try{if(typeof d=='string')d=JSON.parse(d)}catch(e){return E(d)}if(!d||typeof d!='object')return E(d??'');if(d.reason)return E((d.client?d.client+': ':'')+d.reason);if(d.reasons)return E([].concat(d.reasons).join(' '));return E(Object.entries(d).filter(([k])=>!/key|paypal|id$/i.test(k)).map(([k,v])=>k.replace(/_/g,' ')+': '+(typeof v=='object'?JSON.stringify(v):v)).join(' · '))}
 async function aud(){const a=await api('/api/audit'),seen={},g=[];for(const x of a){if(/waiting/i.test(x.event)){const k=x.event+JSON.stringify(x.details);if(seen[k]){seen[k].n++;continue}seen[k]={x,n:1};g.push(seen[k])}else g.push({x,n:1})}
 Q('aud').innerHTML=g.length?g.map(({x,n})=>`<div class="log"><b>${E(hum(x.event))}</b>${n>1?` <span>×${n}</span>`:''} <span>${tm(x.ts)}</span><div>${fmt(x.details)}</div></div>`).join(''):'<p class="hint">Every decision is logged here with its reason.</p>'}
-const side=()=>{appr();aud()};
+let STATE=null,DOCS=[];
+const T=(id,h)=>Q(id).innerHTML=h;
+const TS=['Plan created','Invoices sent','Clients pay','Contractors paid','Verified & settled'];
+const stg=e=>/plan|goal/.test(e)?0:/invoice_sent/.test(e)?1:/invoice_status|payment/.test(e)?2:/payout/.test(e)?3:/email|approval|attack/.test(e)?4:-1;
+const DS={Invoice:1,Receipt:2,'Payout confirmation':3,'Verification record':4,'Settlement report':4};
+function stats(s){STATE=s.goal_id?s:STATE;const t=(STATE&&STATE.totals)||{},inv=(STATE&&STATE.invoices)||[],pay=(STATE&&STATE.payouts)||[];
+ const rc=pick(t,'received','cleared')||0,G=+(P&&pick(P.goal,'amount')||0),paid=inv.filter(i=>i.status=='paid').length,ps=pay.filter(p=>p.status=='success').length,pf=pay.filter(p=>/fail|den|return|block/.test(p.status)).length,open=inv.length-paid;
+ T('bal',`<span class="cap">Cleared balance</span><div class="big num" style="margin-top:8px">${$(rc)}</div>${G?bar(G,num(PLAN,/expected|base|no_disc/i)||0,num(PLAN,/best/i)||0,rc):'<p class="hint">Preview a plan to set a goal.</p>'}`);
+ T('vol',`<span>Payment volume</span><b class="num">${$(pick(t,'invoiced')||0)}</b><small>${inv.length} invoices</small>`);
+ T('out',`<span>Paid to contractors</span><b class="num">${$(pick(t,'paid_out')||0)}</b><small>${pay.length} payouts sent</small>`);
+ const tot=Math.max(inv.length,1),mx=Math.max(1,...inv.map(i=>i.amount));
+ T('ana',`<h2>Analytics</h2>${inv.length?inv.map(i=>`<div class="ab"><span class="cl">${E(pick(i,'client','client_id'))}</span><i class="${i.status=='paid'?'paid':''}" style="width:${i.amount/mx*100}%"></i><em>${$(i.amount)}</em></div>`).join('')+'<p class="hint">Dark bars are paid invoices.</p>':'<p class="empty">Invoice amounts by client appear here after you launch a plan.</p>'}`);
+ T('ok',`<h2>Payment outcomes</h2><div class="kv"><div><b style="color:var(--green)">${paid}</b><span>paid invoices</span></div><div><b style="color:var(--amber)">${open}</b><span>still open</span></div><div><b style="color:var(--green)">${ps}</b><span>payouts succeeded</span></div><div><b style="color:var(--red)">${pf}</b><span>payouts failed</span></div></div><div class="seg"><i style="width:${paid/tot*100}%;background:var(--v)"></i><i style="width:${open/tot*100}%;background:#E3DDFB"></i></div><span class="cap">${inv.length?Math.round(paid/tot*100):0}% of invoices paid</span>`)}
+async function story(){let a=[];try{a=(await api('/api/audit')).slice().reverse()}catch(e){return}
+ const lane=TS.map(()=>[]);a.forEach(x=>{const i=stg(x.event);if(i>=0)lane[i].push(x)});
+ DOCS=[];const add=(type,name,amt,f)=>DOCS.push({type,name,amt,f})-1,inv=(STATE&&STATE.invoices)||[],pay=(STATE&&STATE.payouts)||[];
+ inv.forEach(i=>add('Invoice',pick(i,'paypal_invoice_id')||i.key,i.amount,{Client:pick(i,'client','client_id'),Amount:$(i.amount),Status:i.status,Reference:i.key}));
+ inv.filter(i=>i.status=='paid').forEach(i=>add('Receipt','Receipt · '+pick(i,'client','client_id'),i.amount,{Client:pick(i,'client','client_id'),Amount:$(i.amount),Status:'paid'}));
+ pay.forEach(p=>add('Payout confirmation',p.batch_id||p.key,p.amount,{Contractor:pn(p),Amount:$(p.amount),Status:p.status,Batch:p.batch_id}));
+ lane[4].filter(x=>x.event=='email_decision').forEach((x,n)=>{let d=x.details;try{if(typeof d=='string')d=JSON.parse(d)}catch(e){}add('Verification record','Guard check '+(n+1),null,{Decision:d.decision||'',Sender:d.sender||'',Reasons:[].concat(d.reasons||[]).join(' ')})});
+ if(pay.length&&pay.every(p=>p.status=='success'))add('Settlement report','Settlement · '+STATE.goal_id,pick(STATE.totals||{},'paid_out'),{Goal:STATE.goal_id,'Paid out':$(pick(STATE.totals||{},'paid_out')),Payouts:pay.length});
+ const card=i=>{const d=DOCS[i];return `<div class="doc"><i>${E(d.type)}</i><b title="${E(d.name)}">${E(d.name)}</b><span>${d.amt!=null?$(d.amt):'No amount'}</span><div><button class="btn ghost" data-v="${i}">View</button><button class="btn ghost" data-d="${i}">Download</button></div></div>`};
+ let first=true;T('tl',TS.map((t,k)=>{const seen={},ev=[];for(const x of lane[k].slice().reverse()){const key=x.event+JSON.stringify(x.details);if(/waiting/.test(x.event)&&seen[key])continue;seen[key]=1;ev.push(x)}
+  const ds=DOCS.map((d,i)=>DS[d.type]==k?i:-1).filter(i=>i>=0),done=ev.length||ds.length,cls=done?'done':first?'now':'';if(!done)first=false;
+  return `<li class="${cls}"><span class="dot"></span><details ${done&&k>=1&&k<4&&!lane[k+1].length?'open':''}><summary>${t}<span>${ev.length} events${ds.length?' · '+ds.length+' documents':''}</span></summary>${ev.slice(0,5).map(x=>`<div class="ev"><b>${E(hum(x.event))}</b><span>${tm(x.ts)}</span><div>${fmt(x.details)}</div></div>`).join('')||'<p class="hint">Waiting for this step.</p>'}${ds.length?`<div class="docs">${ds.slice(0,6).map(card).join('')}</div>`:''}</details></li>`}).join(''));
+ T('docl',DOCS.length?DOCS.slice(-5).reverse().map((d,j)=>{const i=DOCS.length-1-j;return card(i)}).join('<div style="height:8px"></div>'):'<p class="empty">Invoices, receipts, payout confirmations and Guard verification records appear here as they happen.</p>')}
+function view(i){const d=DOCS[i];if(!d)return;T('drawer',`<div class="row" style="justify-content:space-between;margin:0 0 18px"><h3>${E(d.type)}</h3><button class="btn ghost" id="dx">Close</button></div><p class="hint" style="margin:0 0 12px">${E(d.name)}</p><table><tbody>${Object.entries(d.f).map(([k,v])=>`<tr><th>${E(k)}</th><td>${E(v)}</td></tr>`).join('')}</tbody></table><div class="row"><button class="btn" data-d="${i}">Download</button></div>`);Q('drawer').hidden=Q('scrim').hidden=false}
+function dload(i){const d=DOCS[i];if(!d)return;const b=new Blob([d.type+'\n'+d.name+'\n\n'+Object.entries(d.f).map(([k,v])=>k+': '+v).join('\n')+'\n'],{type:'text/plain'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(d.type+'-'+d.name).replace(/[^\w.-]+/g,'_')+'.txt';a.click();toast('Downloaded '+d.type.toLowerCase())}
+document.addEventListener('click',e=>{const t=e.target;if(t.id=='scrim'||t.id=='dx'){Q('drawer').hidden=Q('scrim').hidden=true}const v=t.closest('[data-v]');if(v)view(+v.dataset.v);const d=t.closest('[data-d]');if(d)dload(+d.dataset.d)});
+document.addEventListener('keydown',e=>{if(e.key=='Escape')Q('drawer').hidden=Q('scrim').hidden=true});
+const side=()=>{appr();aud();story()};stats({});
 Q('chips').innerHTML=PRE.map((p,i)=>`<button class="btn ghost" data-p="${i}">${p[0]}</button>`).join('');
 Q('chips').onclick=e=>{const i=e.target.dataset.p;if(i==null)return;const p=PRE[i];Q('sd').value=p[1];Q('sj').value=p[2];Q('bd').value=p[3]};
 Q('chk').onclick=async()=>{try{const r=await api('/api/email',{id:'demo-'+Date.now(),sender:Q('sd').value,subject:Q('sj').value,body:Q('bd').value});Q('res').innerHTML=`<div class="res ${E(r.decision)}">${pill(r.decision)}<ul>${(r.reasons||[]).map(x=>`<li>${E(x)}</li>`).join('')}</ul></div>`;side()}catch(e){Q('res').innerHTML=`<div class="err">${E(e.message)}</div>`}};
