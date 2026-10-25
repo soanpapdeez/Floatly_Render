@@ -16,6 +16,9 @@ class FakePayPal:
     def get_invoice_status(self, invoice_id):
         return self.invoices[invoice_id]["status"]
 
+    def cancel_invoice(self, invoice_id):
+        self.invoices[invoice_id]["status"] = "cancelled"
+
     def mark_paid(self, invoice_id):          # simulates the client paying
         self.invoices[invoice_id]["status"] = "paid"
 

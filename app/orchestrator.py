@@ -160,7 +160,7 @@ def run_goal(goal_amount: float, deadline: str, *, clients: dict, open_invoices:
 
 def handle_email(email: dict, clients: dict, open_invoices: list, call_llm, store: Store):
     """Extract -> Guard -> audit log. The current due date comes from OUR open invoices, never the email.
-    Applying an approved change (new bank account, discount) is a human step for now; we only log it."""
+    This only DECIDES. An approved change (new bank account, discount) is applied by FloatService.decide()."""
     match = find_client_by_sender(email["sender"], clients)
     due = None
     if match:
@@ -171,3 +171,33 @@ def handle_email(email: dict, clients: dict, open_invoices: list, call_llm, stor
                 client=result.parsed.client_id, intent=result.parsed.intent,
                 decision=result.decision.decision, reasons=result.decision.reasons)
     return result
+
+
+# ------------------------------------------------------------------ owner approved a discount
+
+def reissue_discounted(inv: dict, pct: float, clients: dict, *, paypal, store: Store, approval_id: int) -> dict:
+    """Apply an owner-approved discount: cancel the unpaid PayPal invoice, send a new one at the lower amount.
+    Cancel FIRST so the client is never asked to pay twice. Needs paypal.cancel_invoice; without it we do nothing."""
+    cancel = getattr(paypal, "cancel_invoice", None)
+    if cancel is None:
+        return {"applied": False, "note": "paypal_client has no cancel_invoice yet, so nothing was changed."}
+    if pct is None or not 0 < pct <= guard.MAX_DISCOUNT_PCT:
+        return {"applied": False, "note": f"Discount must be between 0 and {guard.MAX_DISCOUNT_PCT}%; nothing was changed."}
+
+    client = clients[inv["client_id"]]
+    new_amount = round(inv["amount"] * (1 - pct / 100), 2)
+    label = f"Invoice {inv['key'].split(':', 1)[-1]} (approved {pct:g}% discount)"
+    try:
+        cancel(inv["paypal_invoice_id"])
+        store.set_invoice_status(inv["key"], "cancelled")
+        payer = os.getenv("DEMO_PAYER_EMAIL") or client.known_emails[0]
+        new_id = paypal.create_and_send_invoice({"email": payer, "item": label}, round(new_amount * _scale(), 2),
+                                                inv["due_date"], currency=client.currency)
+    except Exception as e:
+        store.audit("discount_apply_failed", approval_id=approval_id, key=inv["key"], error=str(e))
+        return {"applied": False, "note": f"PayPal call failed: {e}"}
+    new_key = f"{inv['key']}:approved-{approval_id}"
+    store.save_invoice(new_key, inv["goal_id"], inv["client_id"], new_id, new_amount, inv["due_date"], pct)
+    store.audit("invoice_reissued", approval_id=approval_id, old_key=inv["key"], new_key=new_key,
+                old_amount=inv["amount"], new_amount=new_amount, discount_pct=pct)
+    return {"applied": True, "old_key": inv["key"], "new_key": new_key, "new_amount": new_amount}

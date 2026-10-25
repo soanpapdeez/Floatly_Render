@@ -14,7 +14,6 @@ The method:
      offer early-pay discounts, cheapest first, until the best case (every offer accepted) covers the goal.
   4. Anything still short is reported honestly as a shortfall.
 """
-
 import json
 import math
 from dataclasses import dataclass, asdict, field
@@ -25,10 +24,10 @@ from . import guard
 from .data import DATA_DIR
 from .models import Client
 
-
 RECENT_N = 3                 # how many recent paid invoices to average
 DEFAULT_DAYS_LATE = 7        # clients with no history: assume late (conservative)
 REMIND_DAYS_BEFORE = 2       # "remind clients 2 days before due date"
+DEMO_ANCHOR = date(2026, 10, 12)   # the "today" the seed due dates in open_invoices.json were designed around
 
 
 @dataclass
@@ -68,10 +67,21 @@ class Plan:
         return asdict(self)
 
 
-def load_open_invoices(path=None) -> list:
+def load_open_invoices(path=None, today: Optional[date] = None) -> list:
+    """today=None: dates exactly as in the file (tests, fixed demos).
+    today=<date>: shift every due date by (today - DEMO_ANCHOR) so the seed data always looks current.
+    The apps pass today=date.today(); otherwise the demo would go stale as the calendar moves on."""
     path = path or (DATA_DIR / "open_invoices.json")
     with open(path, encoding="utf-8") as f:
-        return [OpenInvoice(**row) for row in json.load(f)]
+        rows = json.load(f)
+    shift = timedelta(days=(today - DEMO_ANCHOR).days) if today else timedelta(0)
+    out = []
+    for row in rows:
+        row = dict(row)
+        if shift:
+            row["due_date"] = (date.fromisoformat(row["due_date"]) + shift).isoformat()
+        out.append(OpenInvoice(**row))
+    return out
 
 
 def expected_days_late(client: Client) -> int:
@@ -102,12 +112,7 @@ def discount_tier(days_early_needed: int) -> int:
     return min(tier, guard.APPROVAL_DISCOUNT_PCT)
 
 
-def make_plan(
-    goal_amount: float,
-    deadline: str,
-    open_invoices: list,
-    clients: dict
-) -> Plan:
+def make_plan(goal_amount: float, deadline: str, open_invoices: list, clients: dict) -> Plan:
     deadline_d = date.fromisoformat(deadline)
     on_track, at_risk = [], []
 
@@ -115,63 +120,29 @@ def make_plan(
         client = clients.get(inv.client_id)
 
         if client is None:
-            raise ValueError(
-                f"Open invoice {inv.invoice_id} has unknown client {inv.client_id!r}"
-            )
+            raise ValueError(f"Open invoice {inv.invoice_id} has unknown client {inv.client_id!r}")
 
         late = expected_days_late(client)
         due_d = date.fromisoformat(inv.due_date)
         expected = due_d + timedelta(days=late)
 
         row = (inv, client, late, due_d, expected)
+        (on_track if expected <= deadline_d else at_risk).append(row)
 
-        (
-            on_track if expected <= deadline_d else at_risk
-        ).append(row)
+    expected_on_track = round(sum(r[0].amount for r in on_track), 2)
 
-    expected_on_track = round(
-        sum(r[0].amount for r in on_track),
-        2
-    )
-
-    # Cheapest discounts first (smaller % first),
-    # bigger invoices first within the same %.
+    # Cheapest discounts first (smaller % first), bigger invoices first within the same %.
     candidates = []
-
     for inv, client, late, due_d, expected in at_risk:
         days_early = (expected - deadline_d).days
-
-        candidates.append(
-            (
-                discount_tier(days_early),
-                -inv.amount,
-                inv,
-                client,
-                late,
-                due_d,
-                expected,
-                days_early,
-            )
-        )
-
+        candidates.append((discount_tier(days_early), -inv.amount, inv, client, late, due_d, expected, days_early))
     candidates.sort(key=lambda c: (c[0], c[1]))
 
     cash = expected_on_track
     chosen = {}
-
-    for (
-        tier,
-        _,
-        inv,
-        client,
-        late,
-        due_d,
-        expected,
-        days_early,
-    ) in candidates:
+    for tier, _, inv, client, late, due_d, expected, days_early in candidates:
         if cash >= goal_amount:
             break
-
         cash += inv.amount * (1 - tier / 100)
         chosen[inv.invoice_id] = tier
 
@@ -179,141 +150,53 @@ def make_plan(
 
     # On-track invoices: normal reminder, no discount.
     for inv, client, late, due_d, expected in on_track:
-        items.append(
-            PlanItem(
-                client_id=inv.client_id,
-                amount=inv.amount,
-                due_date=inv.due_date,
-                invoice_id=inv.invoice_id,
-                expected_pay_date=expected.isoformat(),
-                action="reminder",
-                discount_pct=0,
-                cash_if_paid=round(inv.amount, 2),
-                remind_on=(
-                    due_d - timedelta(days=REMIND_DAYS_BEFORE)
-                ).isoformat(),
-                reason=(
-                    f"{client.name} usually pays about {late} day(s) "
-                    f"after the due date, so this should arrive around "
-                    f"{expected.isoformat()}, before your {deadline} deadline. "
-                    f"No discount needed."
-                ),
-            )
-        )
+        items.append(PlanItem(
+            client_id=inv.client_id, amount=inv.amount, due_date=inv.due_date, invoice_id=inv.invoice_id,
+            expected_pay_date=expected.isoformat(), action="reminder", discount_pct=0,
+            cash_if_paid=round(inv.amount, 2),
+            remind_on=(due_d - timedelta(days=REMIND_DAYS_BEFORE)).isoformat(),
+            reason=(f"{client.name} usually pays about {late} day(s) after the due date, so this should "
+                    f"arrive around {expected.isoformat()}, before your {deadline} deadline. No discount needed.")))
 
-    # At-risk invoices: either offer an early-pay discount
-    # or send a normal reminder.
+    # At-risk invoices: either offer an early-pay discount or send a normal reminder.
     for inv, client, late, due_d, expected in at_risk:
         days_early = (expected - deadline_d).days
         tier = chosen.get(inv.invoice_id)
-
         if tier:
             cost = round(inv.amount * tier / 100, 2)
-
-            items.append(
-                PlanItem(
-                    client_id=inv.client_id,
-                    amount=inv.amount,
-                    due_date=inv.due_date,
-                    invoice_id=inv.invoice_id,
-                    expected_pay_date=expected.isoformat(),
-                    action="early_pay_offer",
-                    discount_pct=tier,
-                    cash_if_paid=round(
-                        inv.amount * (1 - tier / 100),
-                        2
-                    ),
-                    remind_on=(
-                        due_d - timedelta(days=REMIND_DAYS_BEFORE)
-                    ).isoformat(),
-                    reason=(
-                        f"{client.name} usually pays around "
-                        f"{expected.isoformat()}, {days_early} day(s) "
-                        f"after your {deadline} deadline. Offering "
-                        f"{tier}% off if they pay by {deadline} "
-                        f"(costs ${cost:,.2f}) is the cheapest way "
-                        f"to close the gap."
-                    ),
-                )
-            )
-
+            items.append(PlanItem(
+                client_id=inv.client_id, amount=inv.amount, due_date=inv.due_date, invoice_id=inv.invoice_id,
+                expected_pay_date=expected.isoformat(), action="early_pay_offer", discount_pct=tier,
+                cash_if_paid=round(inv.amount * (1 - tier / 100), 2),
+                remind_on=(due_d - timedelta(days=REMIND_DAYS_BEFORE)).isoformat(),
+                reason=(f"{client.name} usually pays around {expected.isoformat()}, {days_early} day(s) after your "
+                        f"{deadline} deadline. Offering {tier}% off if they pay by {deadline} "
+                        f"(costs ${cost:,.2f}) is the cheapest way to close the gap.")))
         else:
-            items.append(
-                PlanItem(
-                    client_id=inv.client_id,
-                    amount=inv.amount,
-                    due_date=inv.due_date,
-                    invoice_id=inv.invoice_id,
-                    expected_pay_date=expected.isoformat(),
-                    action="reminder",
-                    discount_pct=0,
-                    cash_if_paid=round(inv.amount, 2),
-                    remind_on=(
-                        due_d - timedelta(days=REMIND_DAYS_BEFORE)
-                    ).isoformat(),
-                    reason=(
-                        f"{client.name} will probably pay around "
-                        f"{expected.isoformat()}, after your deadline, "
-                        f"but a discount isn't needed to reach the goal. "
-                        f"Normal reminder only."
-                    ),
-                )
-            )
+            items.append(PlanItem(
+                client_id=inv.client_id, amount=inv.amount, due_date=inv.due_date, invoice_id=inv.invoice_id,
+                expected_pay_date=expected.isoformat(), action="reminder", discount_pct=0,
+                cash_if_paid=round(inv.amount, 2),
+                remind_on=(due_d - timedelta(days=REMIND_DAYS_BEFORE)).isoformat(),
+                reason=(f"{client.name} will probably pay around {expected.isoformat()}, after your deadline, "
+                        f"but a discount isn't needed to reach the goal. Normal reminder only.")))
 
     best_case = round(cash, 2)
-
-    shortfall = round(
-        max(0.0, goal_amount - best_case),
-        2
-    )
-
-    total_cost = round(
-        sum(
-            i.amount * i.discount_pct / 100
-            for i in items
-        ),
-        2
-    )
-
-    items.sort(
-        key=lambda i: (
-            i.action != "early_pay_offer",
-            i.expected_pay_date
-        )
-    )
-
-    return Plan(
-        goal_amount=goal_amount,
-        deadline=deadline,
-        expected_on_track=expected_on_track,
-        best_case=best_case,
-        shortfall=shortfall,
-        covered=shortfall == 0,
-        total_discount_cost=total_cost,
-        items=items,
-    )
+    shortfall = round(max(0.0, goal_amount - best_case), 2)
+    total_cost = round(sum(i.amount * i.discount_pct / 100 for i in items), 2)
+    items.sort(key=lambda i: (i.action != "early_pay_offer", i.expected_pay_date))
+    return Plan(goal_amount=goal_amount, deadline=deadline, expected_on_track=expected_on_track,
+                best_case=best_case, shortfall=shortfall, covered=shortfall == 0,
+                total_discount_cost=total_cost, items=items)
 
 
 def format_plan(plan: Plan) -> str:
-    lines = [
-        f"Goal: ${plan.goal_amount:,.2f} by {plan.deadline}",
-        f"Expected with no discounts: ${plan.expected_on_track:,.2f}",
-        f"Best case with offers accepted: ${plan.best_case:,.2f}  "
-        f"({'GOAL COVERED' if plan.covered else f'SHORT by ${plan.shortfall:,.2f}'}",
-        f"Most we could give away: ${plan.total_discount_cost:,.2f}",
-        "",
-    ]
-
+    status = "GOAL COVERED" if plan.covered else f"SHORT by ${plan.shortfall:,.2f}"
+    lines = [f"Goal: ${plan.goal_amount:,.2f} by {plan.deadline}",
+             f"Expected with no discounts: ${plan.expected_on_track:,.2f}",
+             f"Best case with offers accepted: ${plan.best_case:,.2f}  ({status})",
+             f"Most we could give away: ${plan.total_discount_cost:,.2f}", ""]
     for i in plan.items:
-        tag = (
-            f"OFFER {i.discount_pct:g}%"
-            if i.action == "early_pay_offer"
-            else "reminder  "
-        )
-
-        lines.append(
-            f"[{tag}] {i.invoice_id} {i.client_id} "
-            f"${i.amount:,.2f} -> {i.reason}"
-        )
-
+        tag = f"OFFER {i.discount_pct:g}%" if i.action == "early_pay_offer" else "reminder  "
+        lines.append(f"[{tag}] {i.invoice_id} {i.client_id} ${i.amount:,.2f} -> {i.reason}")
     return "\n".join(lines)
