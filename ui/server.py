@@ -113,7 +113,14 @@ web.json.default = lambda o: dataclasses.asdict(o) if dataclasses.is_dataclass(o
 
 @web.errorhandler(Exception)
 def oops(e):
+    from werkzeug.exceptions import HTTPException
+    if isinstance(e, HTTPException):                       # 404 etc. stay what they are
+        return jsonify({"error": e.description}), e.code
     return jsonify({"error": f"{type(e).__name__}: {e}"}), 500
+
+
+@web.get("/favicon.ico")
+def favicon(): return ("", 204)                            # no icon file; stop the browser asking
 
 
 @web.get("/")
