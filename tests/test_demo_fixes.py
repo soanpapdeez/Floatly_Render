@@ -1,4 +1,4 @@
-"""Acceptance tests for the pre-freeze fixes. Offline: fake PayPal, mock LLM, in-memory DB."""
+﻿"""Acceptance tests for the pre-freeze fixes. Offline: fake PayPal, mock LLM, in-memory DB."""
 from datetime import date, timedelta
 
 import pytest
@@ -12,7 +12,6 @@ from app.planner import format_plan, load_open_invoices, make_plan
 from app.service import FloatService
 from app.store import Store
 
-DECIDE_TODO = pytest.mark.xfail(reason="FloatService.decide() not wired to describe_effect yet", strict=True)
 
 
 def _svc():
@@ -67,7 +66,6 @@ def _decide_m03(approve):
     return svc, svc.decide(a["id"], approve)
 
 
-@DECIDE_TODO
 def test_approve_discount_effect_is_text():
     svc, res = _decide_m03(True)
     assert isinstance(res["effect"], str)
@@ -75,7 +73,6 @@ def test_approve_discount_effect_is_text():
     assert _audit(svc, "approval_decided")[-1]["details"].get("effect") == res["effect"]
 
 
-@DECIDE_TODO
 def test_reject_effect_says_no_change():
     _, res = _decide_m03(False)
     assert isinstance(res["effect"], str) and "no change" in res["effect"].lower()

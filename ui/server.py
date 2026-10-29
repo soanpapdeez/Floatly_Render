@@ -139,5 +139,5 @@ def audit(): return jsonify(svc.audit(100))
 
 
 if __name__ == "__main__":
-    print(f"Floatly UI ({MODE}) -> http://127.0.0.1:5000")
+    print(f"Floatly UI ({MODE}) -> http://127.0.0.1:{os.getenv('PORT', '5000')}")
     web.run(host=os.getenv("HOST", "127.0.0.1"), port=int(os.getenv("PORT", "5000")), debug=False)

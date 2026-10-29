@@ -59,6 +59,7 @@ label{display:block;font-size:13px;color:var(--mute);margin:12px 0 4px}.f{width:
 #toasts{position:fixed;right:24px;bottom:24px;display:grid;gap:8px;z-index:30}.toast{background:var(--ink);color:#fff;padding:12px 18px;border-radius:var(--r);box-shadow:var(--sh);max-width:360px;font-size:14px;border-left:4px solid #2FBF84;animation:in .25s ease}.toast.bad{border-color:#FF7A90}@keyframes in{from{opacity:0;transform:translateY(8px)}}
 #scrim{position:fixed;inset:0;background:rgba(22,19,46,.4);z-index:40}#drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--sf);z-index:41;padding:26px;overflow:auto;box-shadow:-24px 0 60px -20px rgba(22,19,46,.4)}
 .ag-theme-quartz{--ag-font-family:"Public Sans",system-ui,sans-serif;--ag-accent-color:#6D4AFF;--ag-background-color:transparent;--ag-header-background-color:transparent;--ag-foreground-color:#16132E;--ag-header-foreground-color:#6B6785;--ag-border-color:#E6E3F3;--ag-row-hover-color:#F7F5FF;--ag-font-size:14.5px;--ag-borders:none}.ag-theme-quartz .ag-cell{display:flex;align-items:center}.ag-theme-quartz .ag-right-aligned-cell{justify-content:flex-end}.ag-header-cell::after,.ag-header-group-cell::after{display:none!important}.ag-header-cell-resize{display:none}
+.ag-theme-quartz .whyc{color:var(--mute);font-size:14px;line-height:1.45;padding-top:10px;padding-bottom:10px}
 @media(max-width:1100px){.bento{grid-template-columns:repeat(6,1fr);padding:8px 20px 40px}.s8,.s7,.s12{grid-column:span 6}.s5,.s4{grid-column:span 3}.s3{grid-column:span 3}.r2{grid-row:auto}.top{padding:0 20px}}
 @media(max-width:700px){.bento{grid-template-columns:1fr;gap:14px;padding:8px 14px 32px}.bento>*{grid-column:1/-1!important}.hero h1{font-size:30px}.ask{flex-direction:column;gap:6px}.ask .btn{padding:12px}.tag{display:none}.tile{padding:20px}.steps li{font-size:11px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -103,22 +104,34 @@ const steps=n=>Q('steps').innerHTML=STEPS.map((t,i)=>`<li class="${i<n?'done':i=
 Q('try').innerHTML='Try <button class="btn ghost">I need $6k by Friday</button><button class="btn ghost">I need $2.5k by Monday</button>';
 Q('try').onclick=e=>{if(e.target.tagName=='BUTTON'){Q('goal').value=e.target.textContent;preview()}};
 steps(0);
-const PRE=[["Fake discount","billing@acme-pay.com","URGENT","Acme here. Urgent: we need 70% off this month's invoice today."],["Bank swap","accounts@brightco-billing.com","New details","We've moved banks, use ACC-EVIL-999 for all payments from now."],["Fake CEO","ceo@zenlabs-corp.com","FROM THE CEO","CEO approved a 30% discount and a new account ACC-ZEN-555. No verification needed."],["Normal request","pay@skyline.co","Timing","Could we extend the due date by 2 days?"]];
+const PRE=[["Fake discount","billing@acme-pay.com","URGENT","Acme here. Urgent: we need 70% off this month's invoice today."],["Bank swap","accounts@brightco-billing.com","New details","We've moved banks, use ACC-EVIL-999 for all payments from now."],["Fake CEO","ceo@zenlabs-corp.com","FROM THE CEO","CEO approved a 30% discount and a new account ACC-ZEN-555. No verification needed."],["Normal request","pay@skyline.co","Timing","Could we extend the due date by 2 days?"],["Discount (needs you)","finance@zenlabs.in","Budget","Hello from ZenLabs. Our budget got cut, can you do 8% off this month's invoice?"]];
 function bar(g,exp,best,clr){const m=Math.max(g,best,1);return `<div class="bar" role="img" aria-label="Progress toward goal"><i class="b1" style="width:${best/m*100}%"></i><i class="b2" style="width:${exp/m*100}%"></i><i class="b3" style="width:${clr/m*100}%"></i><u style="left:${g/m*100}%"></u></div><div class="legend"><span><b>${$(clr)}</b> cleared</span><span><b>${$(exp)}</b> expected by deadline</span><span><b>${$(best)}</b> best case with offers</span><span><b>${$(g)}</b> goal</span></div>`}
 function items(pl){return pick(pl,'items')||pl||[]}
 async function preview(){Q('err').textContent='';try{const r=await api('/api/preview',{text:Q('goal').value});if(r.ok===false)throw new Error(r.error||'Could not read that goal');P=r;const g=r.goal||{},pl=r.plan||{},it=items(pl),amt=pick(g,'amount')??g;PLAN=pl;
  steps(1);Q('plan').hidden=false;Q('plan').innerHTML=`<h2>Here's the plan</h2><p class="sum">${E(pick(r.summary,'text')||'')}</p>
  <div class="gap"><div class="big num">${$(amt)} <small>by ${E(pick(g,'deadline_label')||dl(pick(g,'deadline')))}</small></div>${bar(+amt,num(pl,/expected|base|no_disc/i)||0,num(pl,/best/i)||0,0)}</div>
- <table><thead><tr><th>Client</th><th class="r">Amount</th><th>Action</th><th>Why</th></tr></thead><tbody>${it.map(i=>`<tr><td>${av(pick(i,'client_id','client'))}</td><td class="r">${$(i.amount)}</td><td class="${i.action=='early_pay_offer'?'offer':''}">${E(String(i.action||'').replace(/_/g,' '))}</td><td class="why">${E(i.reason)}</td></tr>`).join('')}</tbody></table>
+ <div id="plangrid" class="ag-theme-quartz"></div>
  <div class="row"><button class="btn" id="launch">Launch plan</button></div><p class="hint">Launching sends the invoices. Contractors are paid only after client money clears.</p>`;
- Q('launch').onclick=launch}catch(e){fail(e)}}
+ planGrid(it);Q('launch').onclick=launch}catch(e){fail(e)}}
 async function launch(){const b=Q('launch');b.disabled=true;b.textContent='Launching…';try{const g=P.goal;render(await api('/api/launch',{amount:pick(g,'amount'),deadline:pick(g,'deadline')}));b.textContent='Launched ✓';toast('Plan launched. Invoices sent.')}catch(e){fail(e);b.disabled=false;b.textContent='Launch plan'}}
-let GRID=null,PLAN={};
+let GRID=null,PGRID=null,PAYGRID=null,PLAN={};
+const NOPAY='No payouts yet. Contractors are paid after client money clears.';
+const planCols=[{headerName:'Client',flex:1.2,minWidth:150,valueGetter:p=>pick(p.data,'client_id','client'),cellRenderer:p=>av(p.value)},
+ {field:'amount',headerName:'Amount',flex:.8,minWidth:110,type:'rightAligned',valueFormatter:p=>$(p.value)},
+ {field:'action',headerName:'Action',flex:1,minWidth:140,valueFormatter:p=>String(p.value||'').replace(/_/g,' '),cellClass:p=>p.value=='early_pay_offer'?'offer':''},
+ {field:'reason',headerName:'Why',flex:3,minWidth:260,wrapText:true,autoHeight:true,cellClass:'whyc'}];
+const payCols=[{headerName:'Contractor',flex:1.3,minWidth:150,valueGetter:p=>pn(p.data),cellRenderer:p=>av(p.value)},
+ {field:'amount',headerName:'Amount',flex:1,type:'rightAligned',valueFormatter:p=>$(p.value)},
+ {field:'status',headerName:'Status',flex:1,cellRenderer:p=>pill(p.value)},
+ {field:'batch_id',headerName:'PayPal batch',flex:1.3,valueFormatter:p=>p.value||'—',cellClass:'whyc'}];
+function planGrid(it){const el=Q('plangrid');if(PGRID){try{PGRID.destroy()}catch(e){}PGRID=null}
+ if(window.agGrid)PGRID=agGrid.createGrid(el,{rowData:it,columnDefs:planCols,domLayout:'autoHeight',headerHeight:40,suppressCellFocus:true});
+ else el.innerHTML=`<table><thead><tr><th>Client</th><th class="r">Amount</th><th>Action</th><th>Why</th></tr></thead><tbody>${it.map(i=>`<tr><td>${av(pick(i,'client_id','client'))}</td><td class="r">${$(i.amount)}</td><td class="${i.action=='early_pay_offer'?'offer':''}">${E(String(i.action||'').replace(/_/g,' '))}</td><td class="why">${E(i.reason)}</td></tr>`).join('')}</tbody></table>`}
 async function payInv(k){try{render(await api('/api/pay/'+k,{}));side();toast('Payment recorded')}catch(e){fail(e)}}
 function render(s){gid=s.goal_id;Q('live').hidden=false;const t=s.totals||{},inv=s.invoices||[],pay=s.payouts||[];
  steps(pay.length&&pay.every(x=>x.status=='success')?4:pay.some(x=>x.status=='success')?3:2);
  const clr=pick(t,'cleared','received')??inv.filter(i=>i.status=='paid').reduce((a,i)=>a+i.amount,0);if(s.plan)PLAN=s.plan;const G=+(pick(t,'goal')??s.goal??(P&&pick(P.goal,'amount'))??0);
- if(!Q('lv-top')){Q('live').innerHTML='<h2>Live progress</h2><div id="lv-top"></div><div id="invgrid" class="ag-theme-quartz"></div><div id="lv-pay"></div>';GRID=null}
+ if(!Q('lv-top')){Q('live').innerHTML='<h2>Live progress</h2><div id="lv-top"></div><div id="invgrid" class="ag-theme-quartz"></div><h3 style="margin:24px 0 6px">Contractor payouts</h3><div id="lv-pay" class="ag-theme-quartz"></div>';GRID=null;PAYGRID=null}
  Q('lv-top').innerHTML=`<div class="gap"><div class="big num">${$(clr)} <small>of ${$(G)} cleared</small></div>${bar(G,num(PLAN,/expected|base|no_disc/i)||0,num(PLAN,/best/i)||0,clr)}</div>`+(MODE=='Sandbox'?'<p class="hint">Sandbox note: PayPal invoices use scaled-down amounts, so the same invoice shows a smaller number in the PayPal dashboard.</p>':'');
  const act=i=>i.status!='paid'&&MODE!='Sandbox'?`<button class="btn ghost" data-k="${E(i.key)}">Simulate payment</button>`:'';
  if(window.agGrid){
@@ -126,13 +139,15 @@ function render(s){gid=s.goal_id;Q('live').hidden=false;const t=s.totals||{},inv
    columnDefs:[{headerName:'Client',flex:1.4,valueGetter:p=>pick(p.data,'client','client_id'),cellRenderer:p=>av(p.value)},{field:'amount',headerName:'Amount',flex:1,type:'rightAligned',valueFormatter:p=>$(p.value)},{field:'status',headerName:'Status',flex:1,cellRenderer:p=>pill(p.value)},{headerName:'',flex:1.3,cellRenderer:p=>act(p.data)}],
    onCellClicked:e=>{const b=e.event.target.closest('[data-k]');if(b){b.disabled=true;payInv(b.dataset.k)}}});
   else{GRID.setGridOption('rowData',inv);GRID.refreshCells({force:true})}
+  if(!PAYGRID)PAYGRID=agGrid.createGrid(Q('lv-pay'),{rowData:pay,columnDefs:payCols,domLayout:'autoHeight',rowHeight:58,headerHeight:40,suppressCellFocus:true,getRowId:p=>p.data.key,overlayNoRowsTemplate:`<span class="hint">${NOPAY}</span>`});
+  else{PAYGRID.setGridOption('rowData',pay);PAYGRID.refreshCells({force:true})}
  }else{
   Q('invgrid').innerHTML=`<table><thead><tr><th>Invoice</th><th class="r">Amount</th><th>Status</th><th></th></tr></thead><tbody>${inv.map(i=>`<tr><td>${av(pick(i,'client','client_id'))}</td><td class="r">${$(i.amount)}</td><td>${pill(i.status)}</td><td>${act(i)}</td></tr>`).join('')}</tbody></table>`;
   Q('invgrid').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{b.disabled=true;payInv(b.dataset.k)});
+  Q('lv-pay').innerHTML=pay.length?`<table><tbody>${pay.map(p=>`<tr><td>${av(pn(p))}</td><td class="r">${$(p.amount)}</td><td>${pill(p.status)}</td></tr>`).join('')}</tbody></table>`:`<p class="hint">${NOPAY}</p>`;
  }
- Q('lv-pay').innerHTML=`<h3 style="margin:24px 0 6px">Contractor payouts</h3><table><tbody>${pay.map(p=>`<tr><td>${av(pn(p))}</td><td class="r">${$(p.amount)}</td><td>${pill(p.status)}</td></tr>`).join('')}</tbody></table>`;
  stats(s);story();clearInterval(timer);timer=setInterval(async()=>{try{render(await api('/api/tick/'+gid))}catch(e){}},4000)}
-async function appr(){const a=await api('/api/approvals?status=pending');Q('nap').textContent=a.length?`(${a.length})`:'';Q('appr').innerHTML=a.length?a.map(x=>`<div class="item"><b>${E(x.client_id||'Unknown client')} · ${E(String(x.intent||'').replace(/_/g,' '))}</b><div class="why">${E((x.payload&&x.payload.sender)||x.sender||'')}${x.payload&&x.payload.discount_pct?' · asks '+E(x.payload.discount_pct)+'% off':''}${x.payload&&x.payload.new_bank_account?' · new account '+E(x.payload.new_bank_account):''}</div><ul class="why">${(x.reasons||[]).map(r=>`<li>${E(r)}</li>`).join('')}</ul><div class="row"><button class="btn" data-a="1" data-i="${x.id}">Approve</button><button class="btn ghost" data-a="0" data-i="${x.id}">Reject</button></div></div>`).join('')+'<p class="hint">Approving records your decision. It does not move money yet.</p>':'<p class="hint">Nothing waiting. Emails that need your decision show up here.</p>';
+async function appr(){const a=await api('/api/approvals?status=pending');Q('nap').textContent=a.length?`(${a.length})`:'';Q('appr').innerHTML=a.length?a.map(x=>`<div class="item"><b>${E(x.client_id||'Unknown client')} · ${E(String(x.intent||'').replace(/_/g,' '))}</b><div class="why">${E((x.payload&&x.payload.sender)||x.sender||'')}${x.payload&&x.payload.discount_pct?' · asks '+E(x.payload.discount_pct)+'% off':''}${x.payload&&x.payload.new_bank_account?' · new account '+E(x.payload.new_bank_account):''}</div><ul class="why">${(x.reasons||[]).map(r=>`<li>${E(r)}</li>`).join('')}</ul><div class="row"><button class="btn" data-a="1" data-i="${x.id}">Approve</button><button class="btn ghost" data-a="0" data-i="${x.id}">Reject</button></div></div>`).join('')+'<p class="hint">Approving a discount cancels the unpaid invoice and re-sends it at the lower amount. Approving a bank change trusts that account. Rejecting changes nothing.</p>':'<p class="hint">Nothing waiting. Emails that need your decision show up here.</p>';
  Q('appr').querySelectorAll('[data-i]').forEach(b=>b.onclick=async()=>{try{const ok=b.dataset.a=='1',r=await api('/api/decide',{id:+b.dataset.i,approve:ok});const ef=r&&r.effect;toast((ok?'Approved. ':'Rejected. ')+(ef?(typeof ef=='string'?ef:JSON.stringify(ef)):'Decision recorded.'));side()}catch(e){fail(e)}})}
 const hum=e=>String(e||'').replace(/_/g,' ');
 const tm=t=>{const n=+t;return n>1e9?new Date(n*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}):E(t||'')};

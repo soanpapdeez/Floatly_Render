@@ -1,4 +1,4 @@
-import json
+﻿import json
 from datetime import date
 
 import pytest
@@ -33,10 +33,10 @@ def test_approved_discount_cancels_old_invoice_and_sends_new_one():
     old = svc.store.get_invoice(f"{st['goal_id']}:OPEN-003")                  # ZenLabs $2000
     out = svc.submit_email({"id": "e1", "sender": "finance@zenlabs.in", "subject": "s", "body": "8% off"})
     res = svc.decide(out["approval_id"], True)
-    assert res["effect"]["applied"] and res["effect"]["new_amount"] == pytest.approx(1840.0)
+    assert res["effect_details"]["applied"] and res["effect_details"]["new_amount"] == pytest.approx(1840.0)
     assert svc.store.get_invoice(old["key"])["status"] == "cancelled"
     assert svc.paypal.invoices[old["paypal_invoice_id"]]["status"] == "cancelled"
-    new = svc.store.get_invoice(res["effect"]["new_key"])
+    new = svc.store.get_invoice(res["effect_details"]["new_key"])
     assert new["amount"] == pytest.approx(1840.0) and new["status"] == "unpaid"
     # totals ignore the cancelled invoice
     assert svc.state(st["goal_id"])["totals"]["invoiced"] == pytest.approx(st["totals"]["invoiced"] - 2000 + 1840)
@@ -71,7 +71,7 @@ def test_rejected_discount_changes_nothing():
     n = len(svc.paypal.invoices)
     out = svc.submit_email({"id": "e1", "sender": "finance@zenlabs.in", "subject": "s", "body": "8% off"})
     res = svc.decide(out["approval_id"], False)
-    assert res["effect"]["applied"] is False and len(svc.paypal.invoices) == n
+    assert res["effect_details"]["applied"] is False and len(svc.paypal.invoices) == n
 
 
 def test_no_cancel_support_means_nothing_changes():
@@ -88,7 +88,7 @@ def test_no_cancel_support_means_nothing_changes():
     st = _launched(svc)
     out = svc.submit_email({"id": "e1", "sender": "finance@zenlabs.in", "subject": "s", "body": "8% off"})
     res = svc.decide(out["approval_id"], True)
-    assert res["effect"]["applied"] is False
+    assert res["effect_details"]["applied"] is False
     assert all(i["status"] == "unpaid" for i in svc.store.list_invoices(st["goal_id"]))
 
 
@@ -104,7 +104,7 @@ def test_paypal_failure_is_reported_not_raised():
     pp.armed = True
     out = svc.submit_email({"id": "e1", "sender": "finance@zenlabs.in", "subject": "s", "body": "8% off"})
     res = svc.decide(out["approval_id"], True)
-    assert res["effect"]["applied"] is False and "failed" in res["effect"]["note"].lower()
+    assert res["effect_details"]["applied"] is False and "failed" in res["effect_details"]["note"].lower()
     assert any(e["event"] == "discount_apply_failed" for e in svc.audit())
 
 
@@ -115,7 +115,7 @@ def test_approved_bank_change_is_trusted_afterwards_even_after_restart():
     first = svc.submit_email(email)
     assert first["decision"] == "needs_approval"
     res = svc.decide(first["approval_id"], True)
-    assert res["effect"]["applied"]
+    assert res["effect_details"]["applied"]
     assert svc.submit_email({**email, "id": "e3"})["decision"] == "allow"          # same account is now known
 
     svc2 = _svc(_llm(client_id="northwind", intent="bank_change", new_bank_account="ACC-NORTH-902"), store=store)
@@ -136,4 +136,4 @@ def test_deadline_extension_approval_is_recorded_only():
     svc = _svc(_llm(client_id="skyline", intent="deadline_extension", new_due_date="2027-01-31"))
     out = svc.submit_email({"id": "e7", "sender": "pay@skyline.co", "subject": "s", "body": "x"})
     assert out["decision"] == "needs_approval"
-    assert svc.decide(out["approval_id"], True)["effect"]["applied"] is False
+    assert svc.decide(out["approval_id"], True)["effect_details"]["applied"] is False

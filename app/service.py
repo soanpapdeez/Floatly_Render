@@ -1,4 +1,4 @@
-"""
+﻿"""
 FloatService: the ONE object the UI talks to. Every method returns plain dicts/lists (JSON-ready).
 
     svc = build_service(fake=True)            # offline: fake PayPal, in-memory DB, no keys
@@ -10,7 +10,8 @@ FloatService: the ONE object the UI talks to. Every method returns plain dicts/l
     svc.tick(goal_id)                         -> poll PayPal, pay contractors from cleared money, return the state
     svc.submit_email(email)                   -> extract -> Guard -> log; creates an approval if a human must decide
     svc.approvals("pending")                  -> things waiting for the owner
-    svc.decide(approval_id, True/False)       -> owner's one-tap approve / reject; result has an "effect" field
+    svc.decide(approval_id, True/False)       -> owner's one-tap approve / reject; "effect" is one plain sentence,
+                                                 "effect_details" is the raw result
     svc.audit(100)                            -> audit log
     svc.simulate_payment(invoice_key)         -> FAKE mode only: pretend a client paid
 """
@@ -19,6 +20,7 @@ from dataclasses import asdict
 from datetime import date
 from typing import Optional
 
+from .effects import describe_effect
 from .goal_parser import parse_goal
 from .notify import notify
 from .orchestrator import (check_and_pay, handle_email, load_contractors, make_goal_id, reissue_discounted,
@@ -105,28 +107,31 @@ class FloatService:
         """Owner's decision. 'block' decisions never reach here.
         Approved bank change    -> the account is remembered for that client (Guard accepts it from now on).
         Approved discount       -> the client's newest unpaid invoice is cancelled and re-sent at the lower amount.
-        Anything else           -> recorded and logged only. The result has an "effect" describing what happened."""
+        Anything else           -> recorded and logged only.
+        The result has "effect" (one plain sentence for the UI) and "effect_details" (the raw result)."""
         a = self.store.decide_approval(approval_id, "approved" if approve else "rejected", note)
-        effect = {"applied": False, "note": "Decision recorded."}
+        client = self.clients.get(a["client_id"])
+        details = {"applied": False, "note": "Decision recorded."}
         if approve:
             payload = a["payload"]
-            if a["intent"] == "bank_change" and payload.get("new_bank_account") and a["client_id"] in self.clients:
+            if a["intent"] == "bank_change" and payload.get("new_bank_account") and client:
                 account = payload["new_bank_account"]
                 self.store.add_known_account(a["client_id"], account)
-                client = self.clients[a["client_id"]]
                 if account not in client.known_accounts:
                     client.known_accounts.append(account)
-                effect = {"applied": True, "note": f"Account {account} is now trusted for {client.name}."}
-            elif a["intent"] == "discount_request" and payload.get("discount_pct") and a["client_id"] in self.clients:
+                details = {"applied": True, "account": account, "note": f"Account {account} is now trusted for {client.name}."}
+            elif a["intent"] == "discount_request" and payload.get("discount_pct") and client:
                 unpaid = self.store.unpaid_invoices_for_client(a["client_id"])
                 if unpaid:
-                    effect = reissue_discounted(unpaid[0], payload["discount_pct"], self.clients,
-                                                paypal=self.paypal, store=self.store, approval_id=approval_id)
+                    details = {**reissue_discounted(unpaid[0], payload["discount_pct"], self.clients,
+                                                    paypal=self.paypal, store=self.store, approval_id=approval_id),
+                               "discount_pct": payload["discount_pct"]}
                 else:
-                    effect = {"applied": False, "note": "No unpaid invoice for this client, so nothing to discount."}
+                    details = {"applied": False, "note": "No unpaid invoice for this client, so nothing to discount."}
+        effect = describe_effect(a["intent"], approve, details, client.name if client else None)
         self.store.audit("approval_decided", approval_id=approval_id, status=a["status"], intent=a["intent"],
-                         client=a["client_id"], note=note, effect=effect)
-        return {**a, "effect": effect}
+                         client=a["client_id"], note=note, reason=effect, effect=effect, effect_details=details)
+        return {**a, "effect": effect, "effect_details": details}
 
     def audit(self, limit: int = 100) -> list:
         return self.store.list_audit(limit)
