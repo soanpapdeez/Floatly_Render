@@ -8,3 +8,4 @@ venv/
 *.sqlite3
 .DS_Store
 float.db
+app/paypal_client_draft.py
