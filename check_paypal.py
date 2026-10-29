@@ -1,10 +1,10 @@
-"""Person A, day 1: confirms your sandbox credentials work.  python check_paypal.py"""
+"""Confirms your sandbox credentials work.  python check_paypal.py"""
 import app  # loads .env
 from app.paypal_client import get_access_token
 
 try:
-    token = get_access_token()
-    print(f"OK - got sandbox access token ({token[:6]}...). Credentials work.")
+    get_access_token()
+    print("OK - got a sandbox access token. Credentials work.")
 except Exception as e:
-    print(f"FAILED: {e}")
+    print(f"FAILED ({type(e).__name__}). Check PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET and PAYPAL_MODE in .env.")
     raise SystemExit(1)

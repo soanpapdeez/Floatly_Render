@@ -1,6 +1,6 @@
 """Run every sample email through extract -> guard and compare with expected labels.
-   python run_inbox.py                      (uses LLM_PROVIDER from .env, default mock)
-   LLM_PROVIDER=anthropic python run_inbox.py
+   python run_inbox.py              (uses LLM_PROVIDER from .env; default mock)
+   Exit code 0 = every email matched, 1 = at least one mismatch.
 """
 import os
 import sys
