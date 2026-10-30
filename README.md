@@ -151,6 +151,13 @@ The free instance sleeps when idle (first load can take about a minute) and its 
   re-run to check results stay the same.
 - Amounts are treated as USD (the sandbox currency).
 
+### Hosted demo
+
+Render runs `gunicorn ui.server:web` with `FLOAT_FAKE=1` and no secrets at all: fake PayPal, the built-in
+rule-based email reader instead of the AI model, and no Zapier notifications. The real PayPal sandbox, Groq and
+Zapier flows are shown in the video and can be run locally (see "Two modes"). The free instance sleeps when idle
+(first load can take about a minute) and its demo data resets on restart.
+
 ## License
 
 MIT, see [LICENSE.md](LICENSE.md).
