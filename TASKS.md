@@ -18,12 +18,12 @@ Thu 29 Oct:
 ## Before feature freeze (Sun 1 Nov)
 | What | Owner | Status |
 |---|---|---|
-| "(GOAL COVERED" bracket | | |
-| 12 red-team emails (m39-m50) + run_inbox.py x3 on Groq | Tanisha | |
-| Fresh-clone test | Tanisha | |
-| Secrets scan of git history; rotate keys if needed | both | |
+| "(GOAL COVERED" bracket | | done |
+| 12 red-team emails (m39-m50) + run_inbox.py x3 on Groq | Tanisha | done: 50/50 x3 |
+| Fresh-clone test | Tanisha | done |
+| Secrets scan of git history; rotate keys if needed | both | done |
 | UI redesign (optional; must be final before recording) | both | |
-| Render + Zap check after last push | teammate | |
+| Render + Zap check after last push | teammate | done |
 | **Feature freeze** | both | **Sun 1 Nov** |
 
 ## After freeze
