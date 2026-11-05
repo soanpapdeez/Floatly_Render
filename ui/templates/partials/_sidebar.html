@@ -1,0 +1,34 @@
+{% macro nav_item(key, href, icon, label, count=False) -%}
+<li><a href="{{ href }}" {% if page == key %}aria-current="page"{% endif %} title="{{ label }}" aria-label="{{ label }}">
+  <svg class="i" aria-hidden="true"><use href="#{{ icon }}"/></svg><span class="label">{{ label }}</span>
+  {%- if count %}<span class="count" data-pending-count data-n="0" aria-label="pending approvals">0</span>{% endif %}
+</a></li>
+{%- endmacro %}
+<aside class="side" aria-label="Main navigation">
+  <a class="brand" href="/" aria-label="Float + Guard home">
+    <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true">
+      <circle cx="17" cy="17" r="16" fill="var(--bg-inner)" stroke="var(--border-strong)"/>
+      <path d="M8 19.5c2.6-3 5.4-3 8 0s5.4 3 8 0" fill="none" stroke="var(--mauve)" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M10 14c2-2.2 4.6-2.2 7 0s5 2.2 7 0" fill="none" stroke="var(--lime)" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-name">Float <span>+</span> Guard</span>
+  </a>
+  <nav aria-label="Screens">
+    <ul class="nav">
+      {{ nav_item("dashboard", "/", "i-grid", "Dashboard") }}
+      {{ nav_item("invoices", "/invoices", "i-file", "Invoices") }}
+      {{ nav_item("inbox", "/inbox", "i-shield", "Guard Inbox") }}
+      {{ nav_item("approvals", "/approvals", "i-check-circle", "Approvals", True) }}
+      {{ nav_item("audit", "/audit", "i-list", "Audit Log") }}
+    </ul>
+  </nav>
+  <nav class="nav-bottom" aria-label="Tools">
+    <ul class="nav">
+      {{ nav_item("simulate", "/simulate", "i-zap", "Simulate") }}
+      {{ nav_item("settings", "/settings", "i-sliders", "Settings") }}
+    </ul>
+    <div class="side-foot">
+      <b>PayPal decides “paid”.</b><br>An email can never mark money as received.
+    </div>
+  </nav>
+</aside>

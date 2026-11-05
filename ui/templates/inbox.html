@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "partials/_macros.html" import card_header, skeleton, subnav %}
+{% block title %}Guard Inbox · Float + Guard{% endblock %}
+{% block greeting %}<h1 class="greeting">Guard Inbox</h1><p class="crumb"><em>AI read the email. Rules decided.</em></p>{% endblock %}
+{% block subnav %}{{ subnav([("all", "All"), ("allow", "Allowed"), ("needs_approval", "Needs approval"), ("block", "Blocked")], "Verdict filter") }}{% endblock %}
+
+{% block content %}
+<div class="stack">
+  <div class="grid-12">
+    <section class="card col-8" aria-labelledby="t-how">
+      {{ card_header("i-shield-check", "How Guard decides", sub="the AI never decides", tone="mauve", id="t-how", more=False) }}
+      <div class="flow" aria-label="Email goes to the AI extractor, then the rules engine, then a verdict">
+        <span class="step"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg>Client email <span class="tag">untrusted</span></span>
+        <span class="arrow" aria-hidden="true"><svg class="i"><use href="#i-arrow-r"/></svg></span>
+        <span class="step"><svg class="i t-mauve" aria-hidden="true"><use href="#i-sparkle"/></svg>AI extractor <span class="tag mauve">reads only</span></span>
+        <span class="arrow" aria-hidden="true"><svg class="i"><use href="#i-arrow-r"/></svg></span>
+        <span class="step"><svg class="i t-ice" aria-hidden="true"><use href="#i-scale"/></svg>Rules engine <span class="tag ice">decides</span></span>
+        <span class="arrow" aria-hidden="true"><svg class="i"><use href="#i-arrow-r"/></svg></span>
+        <span class="pill v-allow">allow</span><span class="pill v-needs_approval">needs approval</span><span class="pill v-block">block</span>
+      </div>
+      <p class="t-muted" style="font-size:var(--fs-sm)">The AI turns the email into a small structured request. Deterministic rules compare it with your records. Amounts and due dates are never taken from email text, and an email can never mark an invoice paid.</p>
+    </section>
+    <section class="card col-4" aria-labelledby="t-pol">
+      {{ card_header("i-scale", "Policy", link="Settings", href="/settings", tone="ice", id="t-pol", more=False) }}
+      <ul class="mail-rules" style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px">
+        {% for r in policy.rules %}
+        <li class="row" style="justify-content:space-between;flex-wrap:nowrap;gap:10px"><span class="t-2" style="font-size:var(--fs-sm)">{{ r.rule }}</span><span class="pill v-{{ r.verdict }}">{{ 'approval' if r.verdict == 'needs_approval' else r.verdict }}</span></li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+
+  <section class="card flat" aria-labelledby="t-try">
+    <details id="try">
+      <summary class="card-h" style="cursor:pointer;list-style:none">
+        <span class="ic-btn tone-lime" aria-hidden="true"><svg class="i"><use href="#i-send"/></svg></span>
+        <h2 class="card-title" id="t-try">Test an email</h2><span class="divider" aria-hidden="true"></span>
+        <span class="card-sub">paste anything; it runs the same extractor and rules</span>
+        <span class="card-actions"><span class="ic-btn sm" aria-hidden="true"><svg class="i"><use href="#i-chev-d"/></svg></span></span>
+      </summary>
+      <form id="try-form" class="grid-12" style="margin-top:16px">
+        <div class="field col-4"><label for="f-sender">From</label><input class="input" id="f-sender" required value="billing@acme.com"></div>
+        <div class="field col-8"><label for="f-subj">Subject</label><input class="input" id="f-subj" value="Quick question"></div>
+        <div class="field col-12"><label for="f-body">Body</label><textarea class="textarea" id="f-body" required>Hi, Acme here. Could we get 12% off this month's invoice?</textarea></div>
+        <div class="col-12 row"><button class="btn lime" type="submit"><svg class="i"><use href="#i-shield"/></svg>Run through Guard</button><span class="label" id="try-out" aria-live="polite"></span></div>
+      </form>
+    </details>
+  </section>
+
+  <section class="card flat is-loading" id="card-mail" aria-labelledby="t-mail">
+    {{ card_header("i-inbox", "Client emails", sub="newest first", id="t-mail", more=False) }}
+    <div class="row label" style="display:grid;grid-template-columns:minmax(200px,1.1fr) minmax(0,1.2fr) minmax(0,1.2fr);padding:0 18px" aria-hidden="true" id="mail-cols">
+      <span>Email</span><span>Extracted request <span class="tag mauve">AI</span></span><span>Guard decision <span class="tag ice">rules</span></span>
+    </div>
+    {{ skeleton(5) }}
+    <div class="mail-list" id="mail-list" data-fill></div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script type="module" src="/static/js/pages/inbox.js"></script>{% endblock %}

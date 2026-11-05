@@ -1,0 +1,20 @@
+<div class="top-right">
+  <form class="cmd" id="cmd" role="search" aria-label="Ask Float for a cash goal">
+    <svg class="i" aria-hidden="true"><use href="#i-sparkle"/></svg>
+    <label class="sr-only" for="cmd-input">Ask Float</label>
+    <input id="cmd-input" name="q" autocomplete="off" placeholder="Ask Float: I need $6,000 by Friday">
+    <button type="button" class="ic-btn" id="cmd-mic" aria-label="Speak your goal" title="Speak your goal">
+      <svg class="i" aria-hidden="true"><use href="#i-mic"/></svg>
+    </button>
+  </form>
+  <span class="mode-badge" id="mode-badge" data-mode="{{ 'sample' if mode.sample else ('demo' if mode.fake else 'sandbox') }}"
+        title="{{ 'Fake PayPal and rule-based mock AI. No keys, no network.' if mode.fake else 'Real PayPal sandbox calls.' }}">{{ mode.badge }}</span>
+  <button type="button" class="ic-btn" id="theme-toggle" aria-label="Switch canvas colour" title="Switch canvas colour">
+    <svg class="i" aria-hidden="true"><use href="#i-contrast"/></svg>
+  </button>
+  <a class="ic-btn bell" href="/approvals" id="bell" aria-label="Notifications: approvals and PayPal errors">
+    <svg class="i" aria-hidden="true"><use href="#i-bell"/></svg>
+    <span class="bell-dot" id="bell-dot" hidden></span>
+  </a>
+  <span class="avatar" aria-hidden="true">{{ owner[:2]|upper }}</span>
+</div>

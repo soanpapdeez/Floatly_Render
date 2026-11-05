@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% from "partials/_macros.html" import card_header, skeleton, subnav %}
+{% block title %}Dashboard · Float + Guard{% endblock %}
+{% block subnav %}{{ subnav([("overview", "Overview", "i-grid"), ("runway", "Runway", "i-route"), ("activity", "Activity", "i-list")], "Dashboard sections") }}{% endblock %}
+
+{% block content %}
+<div class="stack dash" id="dash">
+  <div id="alerts" class="stack" aria-live="polite"></div>
+
+  <section class="goal-strip" aria-label="Current goal" id="overview">
+    <span class="ic-btn tone-mauve" aria-hidden="true"><svg class="i"><use href="#i-flag"/></svg></span>
+    <span class="goal-text num" id="goal-text"><span class="sk sk-line" style="width:180px;display:inline-block"></span></span>
+    <span class="divider" aria-hidden="true"></span>
+    <span class="meta" id="goal-meta"><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg><span>—</span></span>
+    <span class="divider" aria-hidden="true"></span>
+    <span id="goal-state"></span>
+    <div class="push">
+      <span class="mode-badge" data-mode="{{ 'sample' if mode.sample else ('demo' if mode.fake else 'sandbox') }}">{{ mode.badge }}</span>
+      <span class="avatars" id="goal-avatars" aria-label="Clients in this plan"></span>
+    </div>
+  </section>
+
+  <div class="grid-12">
+    <!-- left: three stacked metric cards -->
+    <div class="col-3 col-left stack">
+      <section class="card is-loading" id="card-cash" aria-labelledby="t-cash">
+        {{ card_header("i-wallet", "Cash by deadline", tone="lime", id="t-cash", more=False) }}
+        {{ skeleton(1, chart=True, big=True) }}
+        <div data-fill>
+          <div class="metric-row"><span class="label">Projected by the deadline</span><span class="label num" id="cash-of"></span></div>
+          <div class="big" id="cash-big">$0</div>
+          <div class="row" style="margin:8px 0 12px" id="cash-tags"></div>
+          <div class="chart wash-lime" id="chart-bars"></div>
+          <div class="legend" style="margin-top:8px"><span><i style="background:var(--lime)"></i>expected</span><span><i style="background:var(--lime-40)"></i>if offers are accepted</span></div>
+        </div>
+      </section>
+
+      <section class="card is-loading" id="card-delay" aria-labelledby="t-delay">
+        {{ card_header("i-clock", "Payment delay", tone="ice", id="t-delay", more=False) }}
+        {{ skeleton(1, chart=True) }}
+        <div data-fill>
+          <div class="metric-row"><span class="label">Predicted days late, per invoice</span><span class="label num" id="delay-risk"></span></div>
+          <div class="chart wash-ice" id="chart-dots" style="margin-top:8px"></div>
+          <p class="label-xs" style="margin-top:8px">Each client's last 3 paid invoices, rounded up. Amber = lands after your deadline.</p>
+        </div>
+      </section>
+
+      <section class="card is-loading" id="card-guard" aria-labelledby="t-guard">
+        {{ card_header("i-shield", "Guard activity", link="Inbox", href="/inbox", tone="mauve", id="t-guard", more=False) }}
+        {{ skeleton(1, chart=True) }}
+        <div data-fill>
+          <div class="row" id="guard-counts" style="gap:6px"></div>
+          <div class="chart wash-zone" id="chart-guard" style="margin-top:12px"></div>
+          <p class="label-xs" style="margin-top:8px">Each capsule is one client email at the discount it asked for, coloured by Guard's verdict.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- centre: hero + activity -->
+    <div class="col-6 col-center stack">
+      <section class="card hero is-loading" id="card-hero" aria-labelledby="t-hero" style="scroll-margin-top:16px">
+        <span id="runway" style="position:absolute;top:-16px"></span>
+        {{ card_header("i-route", "Cash runway", sub="altitude = projected cash", tone="ice", id="t-hero", actions=[("refresh", "i-refresh", "Check PayPal now")]) }}
+        <div class="hero-stage" id="hero-stage">
+          <div class="sk sk-hero" data-skeleton aria-hidden="true"></div>
+        </div>
+        <div class="hero-legend" aria-hidden="true">
+          <span><i style="background:var(--ice)"></i>invoice expected</span>
+          <span><i style="background:var(--lime)"></i>discount offered</span>
+          <span><i style="background:var(--amber)"></i>approval pending</span>
+          <span><i style="background:var(--coral)"></i>attack blocked</span>
+          <span><i style="background:var(--text)"></i>contractor payout</span>
+        </div>
+      </section>
+
+      <section class="card is-loading" id="card-activity" aria-labelledby="t-act" style="scroll-margin-top:16px">
+        <span id="activity" style="position:absolute;top:-16px"></span>
+        {{ card_header("i-list", "Activity", link="Full audit log", href="/audit", id="t-act") }}
+        {{ skeleton(4) }}
+        <div data-fill id="activity-list"></div>
+      </section>
+    </div>
+
+    <!-- right: tiles + AI plan -->
+    <div class="col-3 col-right stack">
+      <section class="card is-loading" id="card-tiles" aria-labelledby="t-tiles">
+        {{ card_header("i-grid", "At a glance", sub="live", id="t-tiles", more=False) }}
+        {{ skeleton(2) }}
+        <div class="tiles" data-fill>
+          <div class="tile"><div class="tile-top"><span class="ic-btn tone-ice" aria-hidden="true"><svg class="i"><use href="#i-send"/></svg></span><span class="delta flat" id="d-sent">—</span></div>
+            <div class="mid" id="v-sent">0</div><span class="label">Invoices sent</span></div>
+          <div class="tile"><div class="tile-top"><span class="ic-btn tone-lime" aria-hidden="true"><svg class="i"><use href="#i-check-circle"/></svg></span><span class="delta flat" id="d-paid">—</span></div>
+            <div class="mid" id="v-paid">$0</div><span class="label">Paid <span class="confirmed"><svg class="i"><use href="#i-shield-check"/></svg>by PayPal</span></span></div>
+          <div class="tile"><div class="tile-top"><span class="ic-btn" aria-hidden="true"><svg class="i"><use href="#i-out"/></svg></span><span class="delta flat" id="d-pay">—</span></div>
+            <div class="mid" id="v-pay">$0</div><span class="label">Payouts released</span></div>
+          <div class="tile"><div class="tile-top"><span class="ic-btn tone-coral" aria-hidden="true"><svg class="i"><use href="#i-ban"/></svg></span><span class="delta flat" id="d-block">—</span></div>
+            <div class="mid" id="v-block">0</div><span class="label">Attacks blocked</span></div>
+        </div>
+      </section>
+
+      <section class="card plan-card is-loading" id="card-plan" aria-labelledby="t-plan">
+        {{ card_header("i-sparkle", "AI plan", sub="summary", tone="mauve", id="t-plan", more=False) }}
+        {{ skeleton(4) }}
+        <div data-fill class="stack" style="align-items:center;gap:18px;padding:6px 0 10px">
+          <p class="plan-text" id="plan-text"></p>
+          <div class="row" id="plan-nums" style="justify-content:center"></div>
+          <div class="cta-wrap"><button class="btn cta" type="button" id="plan-cta"><svg class="i" aria-hidden="true"><use href="#i-play"/></svg><span>Run plan</span></button></div>
+          <p class="plan-src" id="plan-note"></p>
+        </div>
+      </section>
+    </div>
+
+    <!-- bottom: projected balance -->
+    <section class="card col-12 is-loading" id="card-area" aria-labelledby="t-area">
+      <div class="card-h">
+        <span class="ic-btn tone-mauve" aria-hidden="true"><svg class="i"><use href="#i-trend"/></svg></span>
+        <h2 class="card-title" id="t-area">Projected cash balance</h2>
+        <span class="divider" aria-hidden="true"></span>
+        <span class="card-sub">cumulative cash in, before contractor payouts</span>
+        <div class="card-actions">
+          <div class="chips" role="group" aria-label="Range" id="range">
+            <button type="button" data-range="1D" aria-pressed="false">1D</button>
+            <button type="button" data-range="1W" aria-pressed="false">1W</button>
+            <button type="button" data-range="1M" aria-pressed="false">1M</button>
+            <button type="button" data-range="deadline" aria-pressed="true">Deadline</button>
+          </div>
+        </div>
+      </div>
+      {{ skeleton(0, chart=True) }}
+      <div data-fill>
+        <div class="chart wash-mauve" id="chart-area"></div>
+        <div class="legend" style="margin-top:8px"><span><i style="background:var(--mauve)"></i>best case, offers accepted</span><span><i style="background:var(--ice-45)"></i>no discounts</span><span><i style="background:var(--lime)"></i>goal</span></div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}<script type="module" src="/static/js/pages/dashboard.js"></script>{% endblock %}

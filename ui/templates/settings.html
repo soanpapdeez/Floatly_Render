@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "partials/_macros.html" import card_header, subnav %}
+{% block title %}Settings · Float + Guard{% endblock %}
+{% block greeting %}<h1 class="greeting">Settings</h1><p class="crumb">How this Float instance is running. Policy lives in app/guard.py and is read-only here.</p>{% endblock %}
+{% block subnav %}{{ subnav([("general", "General", "i-sliders"), ("policy", "Guard policy", "i-shield")], "Settings section") }}{% endblock %}
+
+{% block content %}
+<div class="grid-12">
+  <section class="card col-6" data-panel="general" aria-labelledby="t-look">
+    {{ card_header("i-contrast", "Appearance", tone="mauve", id="t-look", more=False) }}
+    <div class="switch-row"><div><b>Canvas colour</b><div class="label">The page behind the app. The app itself stays dark.</div></div>
+      <div class="row"><button class="swatch plum" type="button" data-canvas="plum" aria-label="Plum canvas"></button><button class="swatch slate" type="button" data-canvas="slate" aria-label="Slate-teal canvas"></button></div></div>
+    <div class="switch-row"><div><b>Motion</b><div class="label">Charts draw in and numbers count up. Turned off automatically when your system asks for reduced motion.</div></div><span class="tag" id="motion">on</span></div>
+    <div class="switch-row"><div><b>Status checks</b><div class="label">While a plan runs, the dashboard asks PayPal for updates.</div></div><span class="tag ice">every {{ mode.poll_seconds }}s</span></div>
+  </section>
+  <section class="card col-6" data-panel="general" aria-labelledby="t-mode">
+    {{ card_header("i-cpu", "Mode", tone="ice", id="t-mode", more=False) }}
+    <div class="switch-row"><div><b>PayPal</b><div class="label">{{ 'Fake PayPal in memory. No keys, no network. Resets on restart.' if mode.fake else 'Real PayPal sandbox via REST (Invoicing + Payouts).' }}</div></div><span class="mode-badge" data-mode="{{ 'sample' if mode.sample else ('demo' if mode.fake else 'sandbox') }}">{{ mode.badge }}</span></div>
+    <div class="switch-row"><div><b>Email reader</b><div class="label">Only extracts. Guard's rules decide.</div></div><span class="tag mauve">{{ mode.llm_provider }}</span></div>
+    <div class="switch-row"><div><b>Amount scale</b><div class="label">{{ mode.scale_note or 'PayPal receives the same amounts the UI shows.' }}</div></div><span class="tag {{ 'amber' if mode.amount_scale != 1 else '' }}">x{{ mode.amount_scale }}</span></div>
+    <div class="switch-row"><div><b>Source of truth for “paid”</b><div class="label">Only PayPal's invoice status. Never an email.</div></div><span class="tag lime">PayPal</span></div>
+  </section>
+  <section class="card col-12" data-panel="policy" hidden aria-labelledby="t-pol">
+    {{ card_header("i-shield-check", "Guard policy", sub="app/guard.py · precedence block > approval > allow · fails closed", tone="mauve", id="t-pol", more=False) }}
+    <table class="policy">
+      {% for r in policy.rules %}
+      <tr><td>{{ r.rule }}</td><td style="text-align:right"><span class="pill v-{{ r.verdict }}">{{ 'Needs approval' if r.verdict == 'needs_approval' else r.verdict|capitalize }}</span></td></tr>
+      {% endfor %}
+    </table>
+    <p class="label">Float's own early-pay offers never exceed {{ policy.approval_discount_pct }}%, so Guard's limits apply to Float too.</p>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script type="module" src="/static/js/pages/settings.js"></script>{% endblock %}

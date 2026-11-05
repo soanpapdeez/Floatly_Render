@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en" data-canvas="plum">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Float + Guard{% endblock %}</title>
+  <meta name="description" content="A cash-flow agent for freelancers that can't be tricked into giving your money away.">
+  <meta name="color-scheme" content="dark">
+  <script>try { var c = localStorage.getItem("float.canvas"); if (c) document.documentElement.dataset.canvas = c; } catch (e) {}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/css/tokens.css?v={{ v }}">
+  <link rel="stylesheet" href="/static/css/base.css?v={{ v }}">
+  <link rel="stylesheet" href="/static/css/components.css?v={{ v }}">
+  {% block head %}{% endblock %}
+</head>
+<body data-page="{{ page }}">
+  <a class="skip" href="#content">Skip to content</a>
+  {% include "partials/_icons.html" %}
+  <div class="canvas">
+    <div class="app">
+      {% include "partials/_sidebar.html" %}
+      <div class="main">
+        <header class="top">
+          <div class="top-left">
+            {% block greeting %}
+            <h1 class="greeting">Welcome back, <em>{{ owner }}</em></h1>
+            <p class="crumb">{% block crumb %}A cash-flow agent that can't be tricked into giving your money away.{% endblock %}</p>
+            {% endblock %}
+          </div>
+          <div class="subnav-wrap">{% block subnav %}{% endblock %}</div>
+          {% include "partials/_top_actions.html" %}
+        </header>
+        {% if mode.scale_note %}
+        <div class="scale-note" role="note">
+          <svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>
+          <span>{{ mode.scale_note }}</span>
+        </div>
+        {% endif %}
+        <main id="content" tabindex="-1">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+  <div class="tip" id="tip" role="tooltip" aria-hidden="true"></div>
+  <script>window.FLOAT_BOOT = {{ {"mode": mode, "policy": policy, "page": page, "owner": owner} | tojson }};</script>
+  <script type="module" src="/static/js/shell.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

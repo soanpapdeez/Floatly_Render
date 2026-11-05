@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "partials/_macros.html" import card_header, skeleton, subnav %}
+{% block title %}Invoices · Float + Guard{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.3/styles/ag-grid.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.3/styles/ag-theme-quartz.css">
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.3/dist/ag-grid-community.min.noStyle.js" defer></script>
+{% endblock %}
+{% block greeting %}<h1 class="greeting">Invoices</h1><p class="crumb">Predicted pay dates come from each client's history. <em class="t-ice" style="font-style:normal">Paid</em> only ever comes from PayPal.</p>{% endblock %}
+{% block subnav %}{{ subnav([("all", "All"), ("risk", "At risk"), ("discounted", "Discounted"), ("paid", "Paid")], "Invoice filter") }}{% endblock %}
+
+{% block content %}
+<div class="stack">
+  <div id="alerts" class="stack"></div>
+  <div class="grid-12">
+    <section class="card col-3"><span class="label">Invoiced</span><span class="big" id="s-inv">$0</span><span class="label-xs" id="s-inv-n"></span></section>
+    <section class="card col-3"><span class="label">Paid · <span class="confirmed"><svg class="i"><use href="#i-shield-check"/></svg>confirmed by PayPal</span></span><span class="big t-lime" id="s-paid">$0</span><span class="label-xs" id="s-paid-n"></span></section>
+    <section class="card col-3"><span class="label">At risk (after deadline)</span><span class="big t-amber" id="s-risk">$0</span><span class="label-xs" id="s-risk-n"></span></section>
+    <section class="card col-3"><span class="label">Most given away in discounts</span><span class="big t-ice" id="s-disc">$0</span><span class="label-xs" id="s-disc-n"></span></section>
+  </div>
+  <section class="card flat is-loading" id="card-grid" aria-labelledby="t-grid">
+    {{ card_header("i-file", "Open invoices", sub="active goal", id="t-grid", actions=[("refresh", "i-refresh", "Check PayPal now")], more=False) }}
+    {{ skeleton(6) }}
+    <div data-fill>
+      <div id="grid" class="grid-host ag-theme-quartz ag-theme-float" role="region" aria-label="Invoices table"></div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script type="module" src="/static/js/pages/invoices.js"></script>{% endblock %}

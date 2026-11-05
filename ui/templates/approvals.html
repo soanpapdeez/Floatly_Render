@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "partials/_macros.html" import card_header, skeleton, subnav %}
+{% block title %}Approvals · Float + Guard{% endblock %}
+{% block greeting %}<h1 class="greeting">Approvals</h1><p class="crumb">Guard wasn't sure, so you decide. Each button says what it does before you press it.</p>{% endblock %}
+{% block subnav %}{{ subnav([("pending", "Pending", "i-hourglass"), ("decided", "Decided", "i-check")], "Approval status") }}{% endblock %}
+
+{% block content %}
+<div class="stack">
+  <p class="label" id="kbd-hint">Keyboard: <kbd>Tab</kbd> to a card, then <kbd>A</kbd> approve · <kbd>R</kbd> reject.</p>
+  <div id="appr-loading" class="appr-grid" aria-hidden="true">
+    <div class="card">{{ skeleton(6) }}</div><div class="card">{{ skeleton(6) }}</div>
+  </div>
+  <div class="appr-grid" id="appr-list" aria-live="polite"></div>
+</div>
+{% endblock %}
+{% block scripts %}<script type="module" src="/static/js/pages/approvals.js"></script>{% endblock %}

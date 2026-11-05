@@ -1,0 +1,106 @@
+/* Float + Guard design tokens. Components use these variables only: no hard-coded colours anywhere else. */
+:root {
+  /* canvas (page behind the floating app) */
+  --canvas-a: #0B070B;
+  --canvas-b: #2A1F2B;
+  --canvas-glow: rgba(201, 155, 195, 0.10);
+
+  /* surfaces */
+  --bg-app: #0A0A0A;
+  --bg-side: #050505;
+  --bg-card: #161616;
+  --bg-inner: #1C1C1C;
+  --bg-inner-2: #222222;
+  --bg-hover: #262626;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --border-app: rgba(255, 255, 255, 0.06);
+
+  /* text */
+  --text: #F2F2F2;
+  --text-2: #C9C9C9;
+  --muted: #8A8A8A;
+  --on-accent: #0A0A0A;
+
+  /* accents */
+  --lime: #D6F28A;      /* primary data, allow */
+  --ice: #A9CBDA;       /* active pill, secondary data */
+  --mauve: #C99BC3;     /* active sidebar, chart line, CTA glow */
+  --coral: #F0624D;     /* block, critical */
+  --amber: #F2A33A;     /* needs approval */
+  --positive: #4ADE80;
+  --negative: #F87171;
+  --white: #FFFFFF;
+
+  /* tints (accent at low alpha, for washes / pill backgrounds) */
+  --lime-12: rgba(214, 242, 138, 0.12);
+  --lime-25: rgba(214, 242, 138, 0.25);
+  --lime-40: rgba(214, 242, 138, 0.40);
+  --ice-12: rgba(169, 203, 218, 0.12);
+  --ice-25: rgba(169, 203, 218, 0.25);
+  --ice-45: rgba(169, 203, 218, 0.45);
+  --mauve-08: rgba(201, 155, 195, 0.08);
+  --mauve-14: rgba(201, 155, 195, 0.14);
+  --mauve-30: rgba(201, 155, 195, 0.30);
+  --mauve-55: rgba(201, 155, 195, 0.55);
+  --coral-12: rgba(240, 98, 77, 0.12);
+  --coral-25: rgba(240, 98, 77, 0.25);
+  --amber-12: rgba(242, 163, 58, 0.12);
+  --amber-25: rgba(242, 163, 58, 0.25);
+  --positive-14: rgba(74, 222, 128, 0.14);
+  --white-06: rgba(255, 255, 255, 0.06);
+  --white-10: rgba(255, 255, 255, 0.10);
+  --white-20: rgba(255, 255, 255, 0.20);
+  --white-35: rgba(255, 255, 255, 0.35);
+  --white-60: rgba(255, 255, 255, 0.60);
+  --shade-60: rgba(0, 0, 0, 0.60);
+
+  /* gradients (used sparingly) */
+  --grad-nav: linear-gradient(90deg, rgba(201, 155, 195, 0.34) 0%, rgba(201, 155, 195, 0.10) 55%, rgba(201, 155, 195, 0) 100%);
+  --grad-cta-glow: radial-gradient(closest-side, rgba(201, 155, 195, 0.45), rgba(201, 155, 195, 0));
+  --wash-lime: radial-gradient(120% 90% at 50% 100%, rgba(214, 242, 138, 0.08), rgba(214, 242, 138, 0) 70%);
+  --wash-ice: radial-gradient(120% 90% at 50% 50%, rgba(169, 203, 218, 0.08), rgba(169, 203, 218, 0) 70%);
+  --wash-zone: linear-gradient(180deg, rgba(240, 98, 77, 0.10), rgba(242, 163, 58, 0.06) 45%, rgba(214, 242, 138, 0.06));
+  --swatch-plum: linear-gradient(160deg, #0B070B, #2A1F2B);
+  --swatch-slate: linear-gradient(160deg, #6B8087, #566A71);
+  --wash-mauve: radial-gradient(80% 120% at 50% 0%, rgba(201, 155, 195, 0.10), rgba(201, 155, 195, 0) 70%);
+
+  /* type */
+  --font: "Manrope", "Plus Jakarta Sans", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-hero: 36px;
+  --fs-xl: 28px;
+  --fs-title: 17px;
+  --fs-body: 14px;
+  --fs-sm: 13px;
+  --fs-label: 12px;
+  --fs-xs: 11px;
+
+  /* shape + space (8px grid) */
+  --r-app: 36px;
+  --r-card: 24px;
+  --r-inner: 16px;
+  --r-sm: 10px;
+  --r-pill: 999px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px; --s10: 40px;
+  --gap: 16px;
+
+  /* depth + motion */
+  --shadow-app: 0 40px 120px -30px rgba(0, 0, 0, 0.75), 0 0 0 1px var(--border-app);
+  --shadow-pop: 0 18px 50px -12px rgba(0, 0, 0, 0.7);
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --t-fast: 160ms;
+  --t-med: 320ms;
+  --t-draw: 600ms;
+  --focus: 0 0 0 2px var(--bg-app), 0 0 0 4px var(--ice);
+}
+
+/* Theme toggle: slate-teal canvas (as in the reference shot). The app container stays dark. */
+:root[data-canvas="slate"] {
+  --canvas-a: #6B8087;
+  --canvas-b: #566A71;
+  --canvas-glow: rgba(169, 203, 218, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --t-fast: 0ms; --t-med: 0ms; --t-draw: 0ms; }
+}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "partials/_macros.html" import card_header, skeleton, subnav %}
+{% block title %}Audit Log · Float + Guard{% endblock %}
+{% block greeting %}<h1 class="greeting">Audit Log</h1><p class="crumb">Every decision and every PayPal effect, with its reason. Repeating states are logged once.</p>{% endblock %}
+{% block subnav %}{{ subnav([("all", "All"), ("decision", "Decisions"), ("effect", "Effects"), ("paypal_error", "PayPal errors"), ("waiting", "Waiting")], "Event type") }}{% endblock %}
+
+{% block content %}
+<section class="card flat is-loading" id="card-audit" aria-labelledby="t-audit">
+  {{ card_header("i-list", "Events", sub="newest first", id="t-audit", more=False) }}
+  <div class="audit-tools">
+    <div class="search" style="flex:1;min-width:220px;max-width:420px">
+      <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+      <label class="sr-only" for="q">Search the audit log</label>
+      <input class="input" id="q" placeholder="Search client, invoice, sender, reason…" autocomplete="off">
+    </div>
+    <span class="label" id="audit-count" aria-live="polite"></span>
+  </div>
+  {{ skeleton(8) }}
+  <div data-fill id="audit-list"></div>
+</section>
+{% endblock %}
+{% block scripts %}<script type="module" src="/static/js/pages/audit.js"></script>{% endblock %}
