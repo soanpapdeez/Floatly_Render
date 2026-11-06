@@ -1,11 +1,24 @@
 {% extends "base.html" %}
 {% from "partials/_macros.html" import card_header, subnav %}
-{% block title %}Settings · Float + Guard{% endblock %}
+{% block title %}Settings · Floatly{% endblock %}
 {% block greeting %}<h1 class="greeting">Settings</h1><p class="crumb">How this Float instance is running. Policy lives in app/guard.py and is read-only here.</p>{% endblock %}
 {% block subnav %}{{ subnav([("general", "General", "i-sliders"), ("policy", "Guard policy", "i-shield")], "Settings section") }}{% endblock %}
 
 {% block content %}
 <div class="grid-12">
+  <section class="card col-12" data-panel="general" id="account" aria-labelledby="t-acct" style="scroll-margin-top:16px">
+    {{ card_header("i-user", "Account", sub="saved in this browser only", tone="lime", id="t-acct", more=False) }}
+    <form id="acct-form" class="row" style="align-items:flex-end;gap:16px">
+      <span class="avatar" id="acct-avatar" aria-hidden="true" style="width:56px;height:56px;font-size:16px">{{ owner[:2]|upper }}</span>
+      <div class="field" style="flex:1;min-width:200px;max-width:360px">
+        <label for="acct-name">Your name (shown in the greeting)</label>
+        <input class="input" id="acct-name" maxlength="40" autocomplete="name" placeholder="{{ owner }}">
+      </div>
+      <button class="btn lime" type="submit"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Save</button>
+      <button class="btn ghost" type="button" id="acct-reset">Reset</button>
+    </form>
+    <p class="label">This demo has no login. The owner is whoever runs this Floatly instance; PayPal keys live in the server's environment, never in the browser.</p>
+  </section>
   <section class="card col-6" data-panel="general" aria-labelledby="t-look">
     {{ card_header("i-contrast", "Appearance", tone="mauve", id="t-look", more=False) }}
     <div class="switch-row"><div><b>Canvas colour</b><div class="label">The page behind the app. The app itself stays dark.</div></div>

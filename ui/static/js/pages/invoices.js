@@ -35,7 +35,7 @@ function render() {
   const m = model, rs = rows();
   const alerts = $("#alerts");
   alerts.innerHTML = m.sample
-    ? `<div class="alert ice">${icon("sparkle")}<div><div class="alert-t">Sample invoices</div><div class="alert-s">No goal yet. Ask Float for one on the dashboard; these rows are an example.</div></div></div>`
+    ? `<div class="alert ice">${icon("sparkle")}<div><div class="alert-t">Sample invoices</div><div class="alert-s">No goal yet. Ask Floatly for one on the dashboard; these rows are an example.</div></div></div>`
     : !m.launched ? `<div class="alert ice">${icon("sparkle")}<div><div class="alert-t">Preview · drafts only</div><div class="alert-s">Nothing has been sent. Run the plan on the dashboard to issue these through PayPal Invoicing.</div></div></div>` : "";
   const sub = $("#card-grid [data-sub]");
   if (sub) sub.textContent = m.goal.amount ? `${money(m.goal.amount)} by ${fmtDay(m.goal.deadline)}` : "no goal";

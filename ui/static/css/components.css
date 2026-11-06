@@ -527,3 +527,7 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 details > summary::-webkit-details-marker { display: none; }
 details[open] > summary [href="#i-chev-d"] { transform: rotate(180deg); }
 @media (max-width: 860px) { #mail-cols { display: none !important; } }
+
+.avatar-link { text-decoration: none; transition: box-shadow var(--t-fast) var(--ease), transform var(--t-fast) var(--ease); }
+.avatar-link:hover { box-shadow: 0 0 0 3px var(--mauve-30); transform: translateY(-1px); }
+.avatar-link[aria-current="page"], body[data-page="settings"] .avatar-link { box-shadow: 0 0 0 3px var(--mauve-55); }

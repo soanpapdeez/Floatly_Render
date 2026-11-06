@@ -1,6 +1,6 @@
-// App shell: sliding pill sub-nav, theme toggle, "Ask Float" command bar, pending-approvals badge.
+// App shell: sliding pill sub-nav, theme toggle, "Ask Floatly" command bar, pending-approvals badge.
 import { api, poll } from "./api.js";
-import { $, $$, store, toast } from "./util.js";
+import { $, $$, store, toast, ownerInitials } from "./util.js";
 
 const BOOT = window.FLOAT_BOOT || {};
 
@@ -72,7 +72,7 @@ export function setCanvas(name) {
   document.dispatchEvent(new CustomEvent("float:canvas", { detail: { canvas: name } }));
 }
 
-// ---------------------------------------------------------------- Ask Float
+// ---------------------------------------------------------------- Ask Floatly
 function initCommand() {
   const form = $("#cmd"), input = $("#cmd-input"), mic = $("#cmd-mic");
   if (!form) return;
@@ -116,6 +116,16 @@ function initPending() {
   poll(refresh, 20);
 }
 
+// ---------------------------------------------------------------- owner name (Settings -> Account, this browser only)
+export function applyOwner() {
+  const name = store.get("owner", null) || BOOT.owner || "friend";
+  const g = $(".greeting em");
+  if (g) g.textContent = name;
+  const a = $("#avatar");
+  if (a) { a.textContent = ownerInitials(name); a.setAttribute("aria-label", `Account: ${name}`); }
+}
+
+applyOwner();
 initSubnav();
 initTheme();
 initCommand();

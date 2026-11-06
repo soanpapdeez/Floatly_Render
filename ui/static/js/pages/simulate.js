@@ -71,7 +71,7 @@ async function renderPayments() {
     const d = await api.dashboard();
     const inv = (d.state && d.state.invoices) || [];
     if (!d.launched || !inv.length) {
-      host.innerHTML = `<div class="empty">${icon("file")}<div><b>No invoices sent yet</b><br>Ask Float for a goal on the <a class="card-link" href="/">dashboard</a> and run the plan first.</div></div>`;
+      host.innerHTML = `<div class="empty">${icon("file")}<div><b>No invoices sent yet</b><br>Ask Floatly for a goal on the <a class="card-link" href="/">dashboard</a> and run the plan first.</div></div>`;
       return;
     }
     const name = (id) => (d.clients.find((c) => c.client_id === id) || {}).name || id;

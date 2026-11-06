@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "partials/_macros.html" import card_header, skeleton, subnav %}
-{% block title %}Audit Log · Float + Guard{% endblock %}
+{% block title %}Audit Log · Floatly{% endblock %}
 {% block greeting %}<h1 class="greeting">Audit Log</h1><p class="crumb">Every decision and every PayPal effect, with its reason. Repeating states are logged once.</p>{% endblock %}
 {% block subnav %}{{ subnav([("all", "All"), ("decision", "Decisions"), ("effect", "Effects"), ("paypal_error", "PayPal errors"), ("waiting", "Waiting")], "Event type") }}{% endblock %}
 

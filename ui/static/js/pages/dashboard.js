@@ -86,7 +86,7 @@ function renderAlerts() {
   if (raw.offline) showAlert("offline", "alert amber", "Showing sample data", `Can't reach the Float server (${esc(raw.offlineError || "")}). Nothing here is real.`); else clearAlert("offline");
   if (raw.sample && !raw.offline) {
     showAlert("sample", "alert ice", "Sample plan · nothing has been sent",
-      `Type a goal in <b>Ask Float</b> (top right) and Float will build your real plan from client payment history.${raw.sampleEmails ? " Guard numbers are sample too: run an attack from <a class='card-link' href='/simulate'>Simulate</a>." : ""}`);
+      `Type a goal in <b>Ask Floatly</b> (top right) and Float will build your real plan from client payment history.${raw.sampleEmails ? " Guard numbers are sample too: run an attack from <a class='card-link' href='/simulate'>Simulate</a>." : ""}`);
   } else clearAlert("sample");
   if (!raw.sample && !model.launched) {
     showAlert("preview", "alert ice", "Preview · nothing has been sent yet",
@@ -176,13 +176,13 @@ function setDelta(sel, text, cls) { const el = $(sel); el.textContent = text; el
 function renderPlan(m) {
   const sub = $("#card-plan [data-sub]");
   if (sub) sub.textContent = raw.sample ? "sample" : raw.summary && raw.summary.source === "ai" ? "written by AI, numbers checked" : "from the plan";
-  $("#plan-text").textContent = (raw.summary && raw.summary.text) || "Ask Float for a goal to get a plan.";
+  $("#plan-text").textContent = (raw.summary && raw.summary.text) || "Ask Floatly for a goal to get a plan.";
   const offers = m.items.filter((i) => i.offer).length;
   $("#plan-nums").innerHTML = `<span class="tag ice">${plural(m.items.length, "invoice")}</span><span class="tag lime">${plural(offers, "offer")}</span><span class="tag">max cost ${money(m.totalDiscountCost, { cents: true })}</span>`;
   const btn = $("#plan-cta"), label = $("span", btn), note = $("#plan-note");
   btn.disabled = false;
   if (m.sample) {
-    label.textContent = "Ask Float"; btn.dataset.do = "ask";
+    label.textContent = "Ask Floatly"; btn.dataset.do = "ask";
     note.textContent = "Nothing is sent until you run a plan.";
   } else if (!m.launched) {
     label.textContent = "Run plan"; btn.dataset.do = "launch";

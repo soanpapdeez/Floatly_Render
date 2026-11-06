@@ -1,4 +1,4 @@
-/* Float + Guard design tokens. Components use these variables only: no hard-coded colours anywhere else. */
+/* Floatly design tokens. Components use these variables only: no hard-coded colours anywhere else. */
 :root {
   /* canvas (page behind the floating app) */
   --canvas-a: #0B070B;

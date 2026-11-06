@@ -59,6 +59,7 @@ export function relTs(ts) {
 
 // ---------------------------------------------------------------- clients
 export const initials = (name) => String(name || "?").replace(/[^A-Za-z0-9 ]/g, " ").trim().split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase() || "?";
+export const ownerInitials = (name) => { const w = String(name || "?").trim().split(/\s+/); return (w.length > 1 ? w[0][0] + w[1][0] : w[0].slice(0, 2)).toUpperCase(); };
 export function clientIndex(id, clients = []) {
   const i = clients.findIndex((c) => c.client_id === id);
   if (i >= 0) return i % 6;

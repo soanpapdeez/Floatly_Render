@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "partials/_macros.html" import card_header, skeleton, subnav %}
-{% block title %}Guard Inbox · Float + Guard{% endblock %}
+{% block title %}Guard Inbox · Floatly{% endblock %}
 {% block greeting %}<h1 class="greeting">Guard Inbox</h1><p class="crumb"><em>AI read the email. Rules decided.</em></p>{% endblock %}
 {% block subnav %}{{ subnav([("all", "All"), ("allow", "Allowed"), ("needs_approval", "Needs approval"), ("block", "Blocked")], "Verdict filter") }}{% endblock %}
 

@@ -1,4 +1,4 @@
-# Float + Guard UI redesign
+# Floatly UI redesign
 
 Dark, soft, rounded UI on Flask + Jinja + static CSS + vanilla ES modules. There is no build step. AG Grid and Manrope come from pinned CDN tags. All charts and the hero are hand-written SVG.
 
@@ -10,7 +10,7 @@ Guard, planner, orchestrator and PayPal code are **unchanged**. Only `ui/` was t
 |---|---|
 | `/api/mode` (`MODE`, `DEMO_AMOUNT_SCALE`) | Mode badge (top bar, goal strip, Settings) and the scale note banner |
 | `app/guard.py` constants (via `/api/meta`, page context) | Guard Inbox "Policy" card, Settings → Guard policy, zone limits in the Guard activity chart |
-| `/api/preview` → `goal`, `plan`, `summary` | "Ask Float" command bar, goal strip, AI plan card (summary + CTA), Preview banner |
+| `/api/preview` → `goal`, `plan`, `summary` | "Ask Floatly" command bar, goal strip, AI plan card (summary + CTA), Preview banner |
 | `/api/launch` | "Run plan" CTA on the AI plan card |
 | `/api/tick/<gid>` (via `/api/dashboard?tick=1`) | Polling for the dashboard and invoices, "Check PayPal now" buttons |
 | `plan.items[].expected_pay_date`, `cash_if_paid`, `discount_pct`, `reason` | Cash by deadline bars, Cash runway pins, Projected balance chart, Invoices grid (predicted date, offer, reason tooltip) |
@@ -96,7 +96,7 @@ ui/
   server.py                      routes + new read-only endpoints (StandIn kept)
   index.html                     previous UI, served at /classic
   templates/
-    base.html                    shell: sidebar, top bar (greeting, pill sub-nav, Ask Float, mode badge, theme, bell, avatar)
+    base.html                    shell: sidebar, top bar (greeting, pill sub-nav, Ask Floatly, mode badge, theme, bell, avatar)
     dashboard.html  invoices.html  inbox.html  approvals.html  audit.html  simulate.html  settings.html
     partials/_icons.html         inline SVG icon sprite
     partials/_sidebar.html       nav + pending badge
@@ -109,7 +109,7 @@ ui/
   static/js/
     api.js                       fetch client + no-overlap poller (pauses in hidden tabs, backs off on errors)
     util.js                      DOM/format/motion/toast/tooltip/storage helpers
-    shell.js                     sliding sub-nav, theme toggle, Ask Float, pending badge
+    shell.js                     sliding sub-nav, theme toggle, Ask Floatly, pending badge
     derive.js                    /api/dashboard payload -> chart-ready view model
     events.js                    audit event -> human title / tone / key-value
     timeline.js                  vertical timeline renderer
